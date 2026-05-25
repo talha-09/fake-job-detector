@@ -1,36 +1,47 @@
 /* 
-   ==========================================================================
    JobGuard — Structural Fraud Scanner Design System
    Technical Brutalist + High-End Editorial (Fraunces + IBM Plex Sans)
-   ==========================================================================
 */
 
 :root {
   /* Warm Near-Black Surface Levels */
-  --bg-primary: #0D0B08;         /* Level 1 (Page BG) */
-  --bg-secondary: #161310;       /* Level 2 (Card Surface) */
-  --bg-card: #161310;            /* Level 2 (Card Surface) */
-  --bg-card-hover: #1A1510;      /* Stat card hover shift background */
-  --bg-input: #1E1A15;           /* Level 3 (Nested/Inset Input) */
+  --bg-primary: #0D0B08;
+  /* Level 1 (Page BG) */
+  --bg-secondary: #161310;
+  /* Level 2 (Card Surface) */
+  --bg-card: #161310;
+  /* Level 2 (Card Surface) */
+  --bg-card-hover: #1A1510;
+  /* Stat card hover shift background */
+  --bg-input: #1E1A15;
+  /* Level 3 (Nested/Inset Input) */
 
   /* Text & Labels (Warm Sand / Linen Palette) */
-  --text-primary: #F4EFE6;       /* Warm linen high contrast base */
-  --text-secondary: rgba(244, 239, 230, 0.6);   /* 0.6 opacity body text */
-  --text-muted: rgba(244, 239, 230, 0.35);      /* Muted placeholders/dates */
+  --text-primary: #F4EFE6;
+  /* Warm linen high contrast base */
+  --text-secondary: rgba(244, 239, 230, 0.6);
+  /* 0.6 opacity body text */
+  --text-muted: rgba(244, 239, 230, 0.35);
+  /* Muted placeholders/dates */
 
   /* Pure Brand Golds (Strictly Two Accents) */
-  --accent: #C9A84C;             /* Primary Gold Accent */
-  --accent-secondary: #A07830;   /* Dimmed/Secondary Gold Accent */
-  --accent-light: #C9A84C;       
+  --accent: #C9A84C;
+  /* Primary Gold Accent */
+  --accent-secondary: #A07830;
+  /* Dimmed/Secondary Gold Accent */
+  --accent-light: #C9A84C;
   --accent-glow: rgba(201, 168, 76, 0.20);
   --accent-subtle: rgba(201, 168, 76, 0.08);
 
   /* Semantic UI Indicators (Low brightness for dark canvas integration) */
-  --green: #2fa15c;              /* Forest Sage (Legitimate) */
+  --green: #2fa15c;
+  /* Forest Sage (Legitimate) */
   --green-subtle: rgba(47, 161, 92, 0.05);
-  --red: #df3d3d;                /* Electric Scarlet (Scam) */
+  --red: #df3d3d;
+  /* Electric Scarlet (Scam) */
   --red-subtle: rgba(223, 61, 61, 0.05);
-  --yellow: #cca32e;             /* Amber Warning */
+  --yellow: #cca32e;
+  /* Amber Warning */
   --yellow-subtle: rgba(204, 163, 46, 0.05);
 
   /* Borders & Structure Lines (Gold-Tinted and Subtle) */
@@ -38,8 +49,10 @@
   --border-hover: rgba(201, 168, 76, 0.24);
 
   /* Precise Technical Radii */
-  --radius-sm: 2px;              /* Input fields, select dropdowns, and buttons */
-  --radius-md: 4px;              /* Cards */
+  --radius-sm: 2px;
+  /* Input fields, select dropdowns, and buttons */
+  --radius-md: 4px;
+  /* Cards */
   --radius-lg: 4px;
   --radius-xl: 4px;
 
@@ -193,7 +206,7 @@ a:hover {
   border-radius: var(--radius-md);
   padding: 32px;
   transition: border-color 180ms var(--ease-out),
-              background-color 180ms var(--ease-out);
+    background-color 180ms var(--ease-out);
 }
 
 .glass-card:hover {
@@ -230,8 +243,8 @@ a:hover {
   color: var(--text-primary);
   border: 1px solid rgba(201, 168, 76, 0.4);
   transition: background-color 200ms ease-out,
-              border-color 180ms var(--ease-out),
-              transform 180ms var(--ease-out);
+    border-color 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
 }
 
 .btn-primary:hover {
@@ -298,6 +311,7 @@ a:hover {
     opacity: 0;
     transform: translateY(14px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -355,6 +369,7 @@ a:hover {
   .container {
     padding: 0 20px;
   }
+
   .page {
     padding-top: calc(var(--nav-height) + 20px);
     padding-bottom: 40px;
