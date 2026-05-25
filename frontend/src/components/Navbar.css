@@ -1,7 +1,5 @@
 /* 
-   ==========================================================================
    Navbar — Technical Brutalist Sticky Header
-   ==========================================================================
 */
 
 .navbar {
@@ -134,7 +132,7 @@
     transform: translateY(-120%);
     opacity: 0;
     transition: transform 0.24s var(--ease-out),
-                opacity 0.24s var(--ease-out);
+      opacity 0.24s var(--ease-out);
     pointer-events: none;
   }
 

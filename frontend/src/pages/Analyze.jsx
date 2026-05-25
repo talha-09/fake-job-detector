@@ -73,7 +73,7 @@ export default function Analyze() {
                 <span className="terminal-dot green" />
                 <span className="terminal-filename">job_description.txt</span>
               </div>
-              
+
               <textarea
                 id="job-text-input"
                 className="analyze-textarea"
@@ -145,7 +145,7 @@ export default function Analyze() {
         {result && (
           <div className="result-container animate-fade-in-up">
             <div className={`analyze-result ${isFake ? "scam-audit" : "safe-audit"}`}>
-              
+
               {/* Memorandum Header Block */}
               <div className="memo-header-block">
                 <div className="memo-brand-stamp">
@@ -186,7 +186,7 @@ export default function Analyze() {
 
               {/* Statistical Ledger Breakdown */}
               <div className="analyze-details">
-                
+
                 {/* Row 1: Model Certainty */}
                 <div className="analyze-detail-row">
                   <div className="analyze-detail-label mono-label">

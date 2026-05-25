@@ -1,8 +1,6 @@
 /* 
-   ==========================================================================
    JobGuard — Structural Fraud Scanner Design System
    Technical Brutalist + High-End Editorial (Fraunces + IBM Plex Sans)
-   ==========================================================================
 */
 
 :root {
@@ -14,22 +12,29 @@
   --bg-input: #0e0e0f;
 
   /* Text & Labels (Warm Sand / Linen Palette) */
-  --text-primary: #f2ede4;       /* Warm linen high contrast */
-  --text-secondary: #aba69a;     /* Muted sand body */
-  --text-muted: #6e6a60;         /* Dark sand borders/placeholders */
+  --text-primary: #f2ede4;
+  /* Warm linen high contrast */
+  --text-secondary: #aba69a;
+  /* Muted sand body */
+  --text-muted: #6e6a60;
+  /* Dark sand borders/placeholders */
 
   /* Brand Accents */
-  --accent: #c5a65c;             /* Gold Leaf */
+  --accent: #c5a65c;
+  /* Gold Leaf */
   --accent-light: #dfcba0;
   --accent-glow: rgba(197, 166, 92, 0.20);
   --accent-subtle: rgba(197, 166, 92, 0.08);
 
   /* Semantic UI Indicators */
-  --green: #2fa15c;              /* Forest Sage (Legitimate) */
+  --green: #2fa15c;
+  /* Forest Sage (Legitimate) */
   --green-subtle: rgba(47, 161, 92, 0.05);
-  --red: #df3d3d;                /* Electric Scarlet (Scam) */
+  --red: #df3d3d;
+  /* Electric Scarlet (Scam) */
   --red-subtle: rgba(223, 61, 61, 0.05);
-  --yellow: #cca32e;             /* Amber Warning */
+  --yellow: #cca32e;
+  /* Amber Warning */
   --yellow-subtle: rgba(204, 163, 46, 0.05);
 
   /* Borders & Structure Lines */
@@ -190,7 +195,7 @@ a:hover {
   border-radius: 0px;
   padding: 32px;
   transition: border-color 0.2s var(--ease-out),
-              background-color 0.2s var(--ease-out);
+    background-color 0.2s var(--ease-out);
 }
 
 .glass-card:hover {
@@ -293,6 +298,7 @@ a:hover {
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -303,6 +309,7 @@ a:hover {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -313,6 +320,7 @@ a:hover {
     opacity: 0;
     transform: translateX(-12px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -320,9 +328,12 @@ a:hover {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.45;
   }
@@ -337,12 +348,29 @@ a:hover {
 }
 
 /* Precise staggered reveal entries */
-.stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 60ms; }
-.stagger > *:nth-child(3) { animation-delay: 120ms; }
-.stagger > *:nth-child(4) { animation-delay: 180ms; }
-.stagger > *:nth-child(5) { animation-delay: 240ms; }
-.stagger > *:nth-child(6) { animation-delay: 300ms; }
+.stagger>*:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stagger>*:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.stagger>*:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.stagger>*:nth-child(4) {
+  animation-delay: 180ms;
+}
+
+.stagger>*:nth-child(5) {
+  animation-delay: 240ms;
+}
+
+.stagger>*:nth-child(6) {
+  animation-delay: 300ms;
+}
 
 
 /* Custom Monospaced Scrollbar */
@@ -370,6 +398,7 @@ a:hover {
   .container {
     padding: 0 20px;
   }
+
   .page {
     padding-top: calc(var(--nav-height) + 20px);
     padding-bottom: 40px;

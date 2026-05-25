@@ -1,7 +1,5 @@
 /*
-   ==========================================================================
    Analyze Page — Technical Brutalist Scanner & Audit Memorandum Styles
-   ==========================================================================
 */
 
 .analyze-header {
@@ -40,9 +38,17 @@
   display: inline-block;
 }
 
-.terminal-dot.red { background-color: #df3d3d; }
-.terminal-dot.yellow { background-color: #cca32e; }
-.terminal-dot.green { background-color: #2fa15c; }
+.terminal-dot.red {
+  background-color: #df3d3d;
+}
+
+.terminal-dot.yellow {
+  background-color: #cca32e;
+}
+
+.terminal-dot.green {
+  background-color: #2fa15c;
+}
 
 .terminal-filename {
   margin-left: 8px;
@@ -54,7 +60,8 @@
 .analyze-input-card {
   max-width: 900px;
   margin: 0 auto 32px;
-  padding: 0; /* Let header and textarea handle internal boundary */
+  padding: 0;
+  /* Let header and textarea handle internal boundary */
   border-top: none;
 }
 
@@ -157,7 +164,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 
@@ -238,8 +247,13 @@
   flex-shrink: 0;
 }
 
-.scam-audit .verdict-icon-wrap { color: var(--red); }
-.safe-audit .verdict-icon-wrap { color: var(--green); }
+.scam-audit .verdict-icon-wrap {
+  color: var(--red);
+}
+
+.safe-audit .verdict-icon-wrap {
+  color: var(--green);
+}
 
 .verdict-large-title {
   font-family: var(--font-display);
@@ -250,8 +264,13 @@
   margin-top: 4px;
 }
 
-.scam-audit .verdict-large-title { color: var(--red); }
-.safe-audit .verdict-large-title { color: var(--green); }
+.scam-audit .verdict-large-title {
+  color: var(--red);
+}
+
+.safe-audit .verdict-large-title {
+  color: var(--green);
+}
 
 /* Stamp Metadata Ledger */
 .metadata-grid {
@@ -357,9 +376,17 @@
   gap: 6px;
 }
 
-.analyze-risk.high { color: var(--red); }
-.analyze-risk.medium { color: var(--yellow); }
-.analyze-risk.low { color: var(--green); }
+.analyze-risk.high {
+  color: var(--red);
+}
+
+.analyze-risk.medium {
+  color: var(--yellow);
+}
+
+.analyze-risk.low {
+  color: var(--green);
+}
 
 /* Monospace keyword tags */
 .analyze-keywords {

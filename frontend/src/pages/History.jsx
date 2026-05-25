@@ -24,7 +24,7 @@ export default function History() {
         setRecords(historyData);
         setStats(statsData);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
@@ -114,9 +114,8 @@ export default function History() {
                     {/* Classification square badge */}
                     <td>
                       <span
-                        className={`badge ${
-                          rec.prediction === "Fake" ? "badge-fake" : "badge-real"
-                        }`}
+                        className={`badge ${rec.prediction === "Fake" ? "badge-fake" : "badge-real"
+                          }`}
                       >
                         {rec.prediction === "Fake"
                           ? <ShieldAlert size={10} />
@@ -134,13 +133,12 @@ export default function History() {
                     {/* Risk Badge */}
                     <td>
                       <span
-                        className={`badge ${
-                          rec.risk_level === "High"
+                        className={`badge ${rec.risk_level === "High"
                             ? "badge-fake"
                             : rec.risk_level === "Medium"
-                            ? "badge-warning"
-                            : "badge-real"
-                        }`}
+                              ? "badge-warning"
+                              : "badge-real"
+                          }`}
                       >
                         {rec.risk_level}
                       </span>
