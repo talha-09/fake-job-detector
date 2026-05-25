@@ -1,0 +1,272 @@
+/*   
+   Dashboard Page — Model performance metrics & visualizations
+   Shows accuracy cards, comparison charts, and confusion matrices
+   loaded from the backend's /static/ and /api/metrics endpoints.
+      */
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+  font-size: 2.25rem;
+  margin-bottom: 8px;
+}
+
+/*   Metric Cards — Top-level KPI tiles     */
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.dashboard-metric-card {
+  text-align: center;
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient glow behind each metric card for depth */
+.dashboard-metric-card::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.dashboard-metric-card.accent::before {
+  background: var(--accent);
+}
+
+.dashboard-metric-card.green::before {
+  background: var(--green);
+}
+
+.dashboard-metric-card.cyan::before {
+  background: var(--cyan);
+}
+
+.dashboard-metric-card.yellow::before {
+  background: var(--yellow);
+}
+
+.dashboard-metric-icon-svg {
+  display: block;
+  margin: 0 auto 8px;
+  color: var(--text-muted);
+}
+
+.dashboard-metric-icon-svg.accent {
+  color: var(--accent-light);
+}
+
+.dashboard-metric-icon-svg.green {
+  color: var(--green);
+}
+
+.dashboard-metric-icon-svg.cyan {
+  color: var(--cyan);
+}
+
+.dashboard-metric-icon-svg.yellow {
+  color: var(--yellow);
+}
+
+.dashboard-metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.dashboard-metric-value.accent {
+  color: var(--accent-light);
+}
+
+.dashboard-metric-value.green {
+  color: var(--green);
+}
+
+.dashboard-metric-value.cyan {
+  color: var(--cyan);
+}
+
+.dashboard-metric-value.yellow {
+  color: var(--yellow);
+}
+
+.dashboard-metric-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/*   Two-column layout for comparison tables & charts*/
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+/*   Section titles inside cards*/
+.dashboard-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/*   Performance comparison table — NB vs LR side by side      */
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.dashboard-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+}
+
+.dashboard-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.dashboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dashboard-table .value-cell {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-table .highlight {
+  color: var(--green);
+}
+
+/*   Chart container — holds Recharts or static images*/
+.dashboard-chart-container {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+
+/*   Confusion matrix images loaded from backend /static/      */
+.dashboard-confusion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.dashboard-confusion-card {
+  padding: 24px;
+}
+
+.dashboard-confusion-img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  /* Smooth loading transition so images don't flash in */
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.dashboard-confusion-img.loaded {
+  opacity: 1;
+}
+
+/*Dataset info bar — shows training data statistics*/
+.dashboard-dataset {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dashboard-dataset-item {
+  text-align: center;
+}
+
+.dashboard-dataset-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dashboard-dataset-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* Loading skeleton — pulsing placeholder while data loads*/
+.dashboard-loading {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.dashboard-spinner-icon {
+  color: var(--accent-light);
+  animation: spin 1s linear infinite;
+  display: block;
+  margin: 0 auto 16px;
+}
+
+/* Error banner — shown if /api/metrics fails*/
+.dashboard-error {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--red);
+}
+
+/*   Responsive — stack columns on mobile*/
+@media (max-width: 768px) {
+  .dashboard-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-confusion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-dataset {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "naive_bayes": {
+    "accuracy": 0.9231,
+    "precision": 0.3786,
+    "recall": 0.9191,
+    "f1_score": 0.5363,
+    "confusion_matrix": [
+      [
+        3142,
+        261
+      ],
+      [
+        14,
+        159
+      ]
+    ]
+  },
+  "logistic_regression": {
+    "accuracy": 0.9804,
+    "precision": 0.7537,
+    "recall": 0.8844,
+    "f1_score": 0.8138,
+    "confusion_matrix": [
+      [
+        3353,
+        50
+      ],
+      [
+        20,
+        153
+      ]
+    ]
+  },
+  "dataset": {
+    "total_rows": 17880,
+    "real_postings": 17014,
+    "fake_postings": 866,
+    "fake_percent": 4.84
+  }
+}
