@@ -21,22 +21,22 @@ export default function Home() {
         <div className="hero-grid">
           {/* Left Column: Direct Copy & Call to Actions */}
           <div className="hero-content">
-            <div className="mono-label hero-status">
+            <div className="mono-label hero-status hero-anim-status">
               <span className="status-dot" />
               STATUS: SCANNER ACTIVE
             </div>
             
-            <h1 className="hero-title">
+            <h1 className="hero-title hero-anim-title">
               We audit job listings for <em>structural signs</em> of fraud.
             </h1>
             
-            <p className="hero-subtitle">
+            <p className="hero-subtitle hero-anim-subtitle">
               A mathematical scanner that identifies employment scams. We vectorise text 
               lexicon patterns and evaluate them using classification models trained on 17,880 
               historic records. Transparent, explainable, and fast.
             </p>
 
-            <div className="hero-actions">
+            <div className="hero-actions hero-anim-actions">
               <Link to="/analyze" className="btn btn-primary" id="cta-analyze">
                 <Search size={14} />
                 Scan Posting
@@ -49,7 +49,7 @@ export default function Home() {
           </div>
 
           {/* Right Column: Giant Asymmetric Stat Card */}
-          <div className="hero-sidebar">
+          <div className="hero-sidebar hero-anim-card">
             <div className="glass-card hero-highlight-card accent-card">
               <div className="mono-label">PRIMARY CLASSIFIER</div>
               <div className="giant-metric-title">98.0%</div>
@@ -63,7 +63,7 @@ export default function Home() {
         </div>
 
         {/* Primary Audit Parameters Row */}
-        <div className="home-stats stagger">
+        <div className="home-stats">
           <div className="glass-card home-stat">
             <Database size={16} className="home-stat-icon" />
             <div className="home-stat-value">17,880</div>
@@ -90,15 +90,15 @@ export default function Home() {
       {/* 3-Step Scan Pipeline */}
       <section className="home-how container">
         <div className="section-header-asymmetric">
-          <div className="mono-label">PIPELINE WORKFLOW</div>
-          <h2>Three stages of verification</h2>
+          <div className="mono-label">Pipeline Workflow</div>
+          <h2>Three stages of <em>verification</em></h2>
         </div>
 
-        <div className="home-steps stagger">
+        <div className="home-steps">
           {/* Step 1 */}
           <div className="glass-card home-step">
             <div className="step-header">
-              <div className="mono-label">STAGE 01</div>
+              <div className="mono-label">Stage 01</div>
               <div className="home-step-icon-wrap"><ClipboardPaste size={20} /></div>
             </div>
             <h3>Paste Posting Text</h3>
@@ -111,7 +111,7 @@ export default function Home() {
           {/* Step 2 */}
           <div className="glass-card home-step">
             <div className="step-header">
-              <div className="mono-label">STAGE 02</div>
+              <div className="mono-label">Stage 02</div>
               <div className="home-step-icon-wrap"><Cpu size={20} /></div>
             </div>
             <h3>Lexical Vectorization</h3>
@@ -124,7 +124,7 @@ export default function Home() {
           {/* Step 3 */}
           <div className="glass-card home-step">
             <div className="step-header">
-              <div className="mono-label">STAGE 03</div>
+              <div className="mono-label">Stage 03</div>
               <div className="home-step-icon-wrap"><CheckCircle2 size={20} /></div>
             </div>
             <h3>Risk Assessment</h3>
@@ -139,11 +139,11 @@ export default function Home() {
       {/* Engine Architecture Grid */}
       <section className="home-features container">
         <div className="section-header-asymmetric">
-          <div className="mono-label">ENGINE ARCHITECTURE</div>
+          <div className="mono-label">Engine Architecture</div>
           <h2>Core system parameters</h2>
         </div>
 
-        <div className="home-features-grid stagger">
+        <div className="home-features-grid">
           {/* Feature 1 */}
           <div className="glass-card home-feature">
             <div className="home-feature-icon">

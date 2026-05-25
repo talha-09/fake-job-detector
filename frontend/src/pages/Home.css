@@ -1,11 +1,13 @@
 /* 
+   ==========================================================================
    Home Page — High-End Asymmetric Editorial Layout Styles
+   ==========================================================================
 */
 
 /* Hero Split Grid */
 .home-hero {
   position: relative;
-  padding: 60px 0 40px;
+  padding: 40px 0;
 }
 
 .hero-grid {
@@ -13,12 +15,13 @@
   grid-template-columns: 1.25fr 0.75fr;
   gap: 60px;
   align-items: start;
-  margin-bottom: 60px;
+  margin-bottom: 96px; /* Exactly 96px vertical padding between hero split and stat cards below */
 }
 
 .hero-content {
   display: flex;
   flex-direction: column;
+  padding-top: 120px; /* Exactly 120px top padding from nav to feel mid-page */
 }
 
 .hero-status {
@@ -64,14 +67,18 @@
   gap: 16px;
 }
 
-/* Sidebar Highlight Card */
+/* Sidebar Highlight Card (Asymmetric Offset) */
 .hero-sidebar {
   width: 100%;
+  margin-top: -20px; /* Offset it slightly by -20px from headline top alignment */
 }
 
 .hero-highlight-card {
   padding: 40px 32px;
-  background: var(--bg-secondary);
+  background: var(--bg-secondary); /* Level 2 BG: #161310 */
+  border: none;
+  border-left: 3px solid var(--accent); /* Distinct 3px solid gold border */
+  border-radius: 0px; /* Sharp corners - no border radius */
 }
 
 .giant-metric-title {
@@ -86,7 +93,7 @@
 
 .divider-line {
   height: 1px;
-  background-color: var(--border);
+  background-color: rgba(201, 168, 76, 0.2); /* Thin gold line at 0.2 opacity */
   margin: 24px 0;
   width: 100%;
 }
@@ -98,18 +105,30 @@
   margin-bottom: 0;
 }
 
-/* Stats Row */
+/* Bottom Stat Cards (Defined by surface level contrast with gold top accents) */
 .home-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  border-top: 1px solid var(--border);
-  padding-top: 40px;
+  gap: 16px; /* Exactly 16px gap between cards */
+  padding-top: 0px;
+  border: none;
 }
 
 .home-stat {
-  padding: 24px;
+  padding: 28px 24px;
   text-align: left;
+  background-color: var(--bg-secondary); /* Level 2 Surface: #161310 */
+  border: none; /* No side or bottom borders */
+  border-top: 2px solid rgba(201, 168, 76, 0.5); /* Faint gold top-border only */
+  border-radius: 4px; /* Card border radius exactly 4px */
+  transition: background-color 180ms var(--ease-out),
+              border-top-color 180ms var(--ease-out);
+}
+
+/* Stat card hover transition: background shifts to #1A1510, top border brightens to full gold */
+.home-stat:hover {
+  background-color: var(--bg-card-hover); /* Level 2 hover BG: #1A1510 */
+  border-top-color: var(--accent); /* Full Gold: #C9A84C */
 }
 
 .home-stat-icon {
@@ -148,9 +167,16 @@
   margin-bottom: 0;
 }
 
-/* Workflow Stage Grid */
+.section-header-asymmetric h2 em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+/* Workflow Stage Grid (Section padding min 80px) */
 .home-how {
-  padding: 80px 0 60px;
+  padding: 80px 0; /* Exactly 80px top and bottom minimum padding */
 }
 
 .home-steps {
@@ -161,6 +187,14 @@
 
 .home-step {
   padding: 36px 28px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px; /* Exactly 4px card radius */
+  transition: border-color 180ms var(--ease-out);
+}
+
+.home-step:hover {
+  border-color: var(--border-hover);
 }
 
 .step-header {
@@ -195,9 +229,9 @@
 }
 
 
-/* Architecture Features */
+/* Architecture Features (Section padding min 80px) */
 .home-features {
-  padding: 40px 0 60px;
+  padding: 80px 0; /* Exactly 80px top and bottom minimum padding */
 }
 
 .home-features-grid {
@@ -210,6 +244,14 @@
   display: flex;
   gap: 24px;
   padding: 32px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px; /* Exactly 4px card radius */
+  transition: border-color 180ms var(--ease-out);
+}
+
+.home-feature:hover {
+  border-color: var(--border-hover);
 }
 
 .home-feature-icon {
@@ -244,9 +286,16 @@
     grid-template-columns: 1fr;
     gap: 40px;
   }
+  .hero-sidebar {
+    margin-top: 0px;
+  }
 }
 
 @media (max-width: 768px) {
+  .hero-content {
+    padding-top: 40px;
+  }
+
   .hero-title {
     font-size: 2.2rem;
   }

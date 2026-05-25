@@ -73,7 +73,7 @@ export default function Analyze() {
                 <span className="terminal-dot green" />
                 <span className="terminal-filename">job_description.txt</span>
               </div>
-
+              
               <textarea
                 id="job-text-input"
                 className="analyze-textarea"
@@ -86,7 +86,7 @@ export default function Analyze() {
               <div className="analyze-controls">
                 {/* Asymmetric dropdown */}
                 <div className="analyze-model-select">
-                  <label htmlFor="model-select" className="mono-label">CLASSIFIER MODEL:</label>
+                  <label htmlFor="model-select" className="mono-label">Classifier Model:</label>
                   <select
                     id="model-select"
                     value={modelName}
@@ -102,7 +102,7 @@ export default function Analyze() {
                 </div>
 
                 <span className="analyze-char-count mono-label">
-                  {jobText.length.toLocaleString()} / 10,000 BYTES
+                  {jobText.length.toLocaleString()} / 10,000 bytes
                 </span>
 
                 <button
@@ -123,7 +123,7 @@ export default function Analyze() {
         {error && (
           <div className="analyze-error mono-label" role="alert">
             <AlertTriangle size={14} />
-            ERROR: {error}
+            Error: {error}
           </div>
         )}
 
@@ -132,10 +132,10 @@ export default function Analyze() {
           <div className="analyze-loading glass-card">
             <Loader2 size={24} className="analyze-spinner-icon" />
             <p className="mono-label animate-pulse">
-              TOKENISING TEXT VIA TF-IDF VECTORISER... Running{" "}
+              Tokenising text via TF-IDF vectoriser... Running{" "}
               {modelName === "logistic_regression"
-                ? "LOGISTIC_REGRESSION_MODEL"
-                : "NAIVE_BAYES_MODEL"}
+                ? "logistic_regression_model"
+                : "naive_bayes_model"}
               ...
             </p>
           </div>
@@ -145,12 +145,12 @@ export default function Analyze() {
         {result && (
           <div className="result-container animate-fade-in-up">
             <div className={`analyze-result ${isFake ? "scam-audit" : "safe-audit"}`}>
-
+              
               {/* Memorandum Header Block */}
               <div className="memo-header-block">
                 <div className="memo-brand-stamp">
                   <div className="stamp-title">JOBGUARD SCANNER</div>
-                  <div className="stamp-id mono-label">ID: {Math.floor(Math.random() * 900000 + 100000)}</div>
+                  <div className="stamp-id mono-label">Id: {Math.floor(Math.random() * 900000 + 100000)}</div>
                 </div>
 
                 <div className="verdict-banner">
@@ -161,7 +161,7 @@ export default function Analyze() {
                     }
                   </div>
                   <div className="verdict-text-group">
-                    <div className="memo-label">AUDIT MEMORANDUM VERDICT</div>
+                    <div className="mono-label">AUDIT MEMORANDUM VERDICT</div>
                     <div className="verdict-large-title">
                       {isFake ? "FLAGGED: HIGH RISK OF SCAM" : "VERIFIED: LOW RISK / LEGITIMATE"}
                     </div>
@@ -170,11 +170,11 @@ export default function Analyze() {
 
                 <div className="metadata-grid">
                   <div className="meta-item">
-                    <span className="meta-key mono-label">SCAN TIMESTAMP:</span>
+                    <span className="meta-key mono-label">Scan Timestamp:</span>
                     <span className="meta-val mono-label">{new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC</span>
                   </div>
                   <div className="meta-item">
-                    <span className="meta-key mono-label">AUDIT ENGINE:</span>
+                    <span className="meta-key mono-label">Audit Engine:</span>
                     <span className="meta-val mono-label">
                       {result.model_used === "logistic_regression"
                         ? "LOGISTIC_REGRESSION_V1"
@@ -186,7 +186,7 @@ export default function Analyze() {
 
               {/* Statistical Ledger Breakdown */}
               <div className="analyze-details">
-
+                
                 {/* Row 1: Model Certainty */}
                 <div className="analyze-detail-row">
                   <div className="analyze-detail-label mono-label">
@@ -201,14 +201,14 @@ export default function Analyze() {
                       />
                     </div>
                     <div className="analyze-confidence-text mono-label">
-                      CLASSIFIER PROBABILITY COEFFICIENT: <strong>{(result.confidence * 100).toFixed(1)}%</strong>
+                      Classifier probability coefficient: <strong>{(result.confidence * 100).toFixed(1)}%</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Row 2: Risk Class */}
                 <div className="analyze-detail-row">
-                  <div className="analyze-detail-label mono-label">
+                  <div className="mono-label analyze-detail-label">
                     <CircleAlert size={12} />
                     Risk Level
                   </div>
@@ -224,7 +224,7 @@ export default function Analyze() {
 
                 {/* Row 3: Flagged Lexical Markers */}
                 <div className="analyze-detail-row">
-                  <div className="analyze-detail-label mono-label">
+                  <div className="mono-label analyze-detail-label">
                     <Tag size={12} />
                     Lexical Keys
                   </div>
@@ -239,7 +239,7 @@ export default function Analyze() {
                       </div>
                     ) : (
                       <span className="analyze-no-keywords mono-label text-dim">
-                        NO HIGH-WEIGHT SUSPICIOUS PATTERNS MATCHED
+                        No suspicious keywords identified
                       </span>
                     )}
                   </div>
@@ -247,7 +247,7 @@ export default function Analyze() {
 
                 {/* Row 4: Narrative Reasoning */}
                 <div className="analyze-detail-row">
-                  <div className="analyze-detail-label mono-label">
+                  <div className="mono-label analyze-detail-label">
                     <FileText size={12} />
                     Explanation
                   </div>

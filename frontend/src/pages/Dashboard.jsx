@@ -34,7 +34,7 @@ export default function Dashboard() {
       <div className="page">
         <div className="container dashboard-loading">
           <Loader2 size={24} className="dashboard-spinner-icon" />
-          <p className="mono-label animate-pulse">LOADING BENCHMARK METRICS...</p>
+          <p className="mono-label animate-pulse">Loading benchmark metrics...</p>
         </div>
       </div>
     );
@@ -123,9 +123,9 @@ export default function Dashboard() {
             <table className="dashboard-table">
               <thead>
                 <tr>
-                  <th className="mono-label">METRIC PARAMETER</th>
-                  <th className="mono-label">NAIVE BAYES</th>
-                  <th className="mono-label">LOGISTIC REGRESSION</th>
+                  <th className="mono-label">Metric Parameter</th>
+                  <th className="mono-label">Naive Bayes</th>
+                  <th className="mono-label">Logistic Regression</th>
                 </tr>
               </thead>
               <tbody>
@@ -173,7 +173,7 @@ export default function Dashboard() {
                     tickFormatter={(v) => `${v}%`}
                   />
                   <Tooltip
-                    cursor={{ fill: "rgba(242, 237, 228, 0.03)" }}
+                    cursor={{ fill: "rgba(201, 168, 76, 0.03)" }}
                     contentStyle={{
                       background: "var(--bg-secondary)",
                       border: "1px solid var(--border)",

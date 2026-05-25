@@ -1,5 +1,7 @@
 /* 
+   ==========================================================================
    Navbar — Technical Brutalist Sticky Header
+   ==========================================================================
 */
 
 .navbar {
@@ -9,8 +11,8 @@
   right: 0;
   z-index: 1000;
   height: var(--nav-height);
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary); /* Level 1 Background: #0D0B08 */
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15); /* Gold-tinted subtle border */
 }
 
 .navbar-inner {
@@ -31,18 +33,18 @@
   text-decoration: none;
   color: var(--text-primary);
   font-weight: 700;
-  transition: color 0.2s var(--ease-out);
+  transition: opacity 180ms var(--ease-out);
 }
 
 .navbar-brand:hover {
-  color: var(--accent);
+  opacity: 0.85;
 }
 
 .navbar-brand-icon {
   width: 32px;
   height: 32px;
-  border-radius: 0px;
-  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -62,39 +64,46 @@
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   list-style: none;
+  height: 100%;
+}
+
+.navbar-links li {
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-link {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 18px;
-  border-radius: 0px;
+  padding: 24px 16px; /* Fills height to sit bottom-border flush with nav bottom */
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-decoration: none;
-  transition: all 0.2s var(--ease-out);
-  border: 1px solid transparent;
+  opacity: 0.45; /* Inactive links start at 0.45 opacity */
+  transition: opacity 180ms var(--ease-out);
+  border-bottom: 2px solid transparent;
+  height: 100%;
 }
 
 .navbar-link:hover {
-  color: var(--text-primary);
-  background: var(--bg-primary);
-  border-color: var(--border);
+  opacity: 1; /* Fade-in to full opacity */
+  background: transparent; /* No background change on hover */
 }
 
+/* Active Nav Item - Flush Gold bottom border, no left border */
 .navbar-link.active {
+  opacity: 1;
   color: var(--accent);
-  background: var(--bg-primary);
-  border-color: var(--border);
-  border-left: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  background: transparent;
 }
 
 .navbar-toggle {
@@ -116,7 +125,7 @@
   .navbar-toggle {
     display: block;
     border: 1px solid var(--border);
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
   }
 
   .navbar-links {
@@ -124,15 +133,16 @@
     top: var(--nav-height);
     left: 0;
     right: 0;
+    height: auto;
     flex-direction: column;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
+    background: var(--bg-primary);
+    border-bottom: 1px solid rgba(201, 168, 76, 0.15);
     padding: 16px;
     gap: 8px;
     transform: translateY(-120%);
     opacity: 0;
-    transition: transform 0.24s var(--ease-out),
-      opacity 0.24s var(--ease-out);
+    transition: transform 180ms var(--ease-out),
+                opacity 180ms var(--ease-out);
     pointer-events: none;
   }
 
@@ -145,9 +155,12 @@
   .navbar-link {
     width: 100%;
     padding: 14px 20px;
+    height: auto;
+    border-bottom: none;
   }
 
   .navbar-link.active {
-    border-left: 3px solid var(--accent);
+    border-bottom: none;
+    border-left: 2px solid var(--accent);
   }
 }

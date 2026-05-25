@@ -24,7 +24,7 @@ export default function History() {
         setRecords(historyData);
         setStats(statsData);
       })
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,7 +33,7 @@ export default function History() {
       <div className="page">
         <div className="container history-loading">
           <Loader2 size={24} className="history-spinner-icon" />
-          <p className="mono-label animate-pulse">QUERYING LOCAL DB LOGS...</p>
+          <p className="mono-label animate-pulse">Querying local DB logs...</p>
         </div>
       </div>
     );
@@ -90,12 +90,12 @@ export default function History() {
               <thead>
                 <tr>
                   <th className="mono-label">#</th>
-                  <th className="mono-label">CORPUS TEXT SCAN</th>
-                  <th className="mono-label">VERDICT</th>
-                  <th className="mono-label">CONFIDENCE</th>
-                  <th className="mono-label">RISK CLASS</th>
-                  <th className="mono-label">ENGINE</th>
-                  <th className="mono-label">DATE RECORDED</th>
+                  <th className="mono-label">Job Text Scan</th>
+                  <th className="mono-label">Verdict</th>
+                  <th className="mono-label">Confidence</th>
+                  <th className="mono-label">Risk Class</th>
+                  <th className="mono-label">Classifier</th>
+                  <th className="mono-label">Date Recorded</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,8 +114,9 @@ export default function History() {
                     {/* Classification square badge */}
                     <td>
                       <span
-                        className={`badge ${rec.prediction === "Fake" ? "badge-fake" : "badge-real"
-                          }`}
+                        className={`badge ${
+                          rec.prediction === "Fake" ? "badge-fake" : "badge-real"
+                        }`}
                       >
                         {rec.prediction === "Fake"
                           ? <ShieldAlert size={10} />
@@ -133,12 +134,13 @@ export default function History() {
                     {/* Risk Badge */}
                     <td>
                       <span
-                        className={`badge ${rec.risk_level === "High"
+                        className={`badge ${
+                          rec.risk_level === "High"
                             ? "badge-fake"
                             : rec.risk_level === "Medium"
-                              ? "badge-warning"
-                              : "badge-real"
-                          }`}
+                            ? "badge-warning"
+                            : "badge-real"
+                        }`}
                       >
                         {rec.risk_level}
                       </span>

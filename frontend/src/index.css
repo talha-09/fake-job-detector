@@ -1,58 +1,54 @@
 /* 
+   ==========================================================================
    JobGuard — Structural Fraud Scanner Design System
    Technical Brutalist + High-End Editorial (Fraunces + IBM Plex Sans)
+   ==========================================================================
 */
 
 :root {
-  /* Matte Carbon Backgrounds */
-  --bg-primary: #09090a;
-  --bg-secondary: #111112;
-  --bg-card: #141416;
-  --bg-card-hover: #19191c;
-  --bg-input: #0e0e0f;
+  /* Warm Near-Black Surface Levels */
+  --bg-primary: #0D0B08;         /* Level 1 (Page BG) */
+  --bg-secondary: #161310;       /* Level 2 (Card Surface) */
+  --bg-card: #161310;            /* Level 2 (Card Surface) */
+  --bg-card-hover: #1A1510;      /* Stat card hover shift background */
+  --bg-input: #1E1A15;           /* Level 3 (Nested/Inset Input) */
 
   /* Text & Labels (Warm Sand / Linen Palette) */
-  --text-primary: #f2ede4;
-  /* Warm linen high contrast */
-  --text-secondary: #aba69a;
-  /* Muted sand body */
-  --text-muted: #6e6a60;
-  /* Dark sand borders/placeholders */
+  --text-primary: #F4EFE6;       /* Warm linen high contrast base */
+  --text-secondary: rgba(244, 239, 230, 0.6);   /* 0.6 opacity body text */
+  --text-muted: rgba(244, 239, 230, 0.35);      /* Muted placeholders/dates */
 
-  /* Brand Accents */
-  --accent: #c5a65c;
-  /* Gold Leaf */
-  --accent-light: #dfcba0;
-  --accent-glow: rgba(197, 166, 92, 0.20);
-  --accent-subtle: rgba(197, 166, 92, 0.08);
+  /* Pure Brand Golds (Strictly Two Accents) */
+  --accent: #C9A84C;             /* Primary Gold Accent */
+  --accent-secondary: #A07830;   /* Dimmed/Secondary Gold Accent */
+  --accent-light: #C9A84C;       
+  --accent-glow: rgba(201, 168, 76, 0.20);
+  --accent-subtle: rgba(201, 168, 76, 0.08);
 
-  /* Semantic UI Indicators */
-  --green: #2fa15c;
-  /* Forest Sage (Legitimate) */
+  /* Semantic UI Indicators (Low brightness for dark canvas integration) */
+  --green: #2fa15c;              /* Forest Sage (Legitimate) */
   --green-subtle: rgba(47, 161, 92, 0.05);
-  --red: #df3d3d;
-  /* Electric Scarlet (Scam) */
+  --red: #df3d3d;                /* Electric Scarlet (Scam) */
   --red-subtle: rgba(223, 61, 61, 0.05);
-  --yellow: #cca32e;
-  /* Amber Warning */
+  --yellow: #cca32e;             /* Amber Warning */
   --yellow-subtle: rgba(204, 163, 46, 0.05);
 
-  /* Borders & Structure Lines */
-  --border: rgba(242, 237, 228, 0.08);
-  --border-hover: rgba(242, 237, 228, 0.16);
+  /* Borders & Structure Lines (Gold-Tinted and Subtle) */
+  --border: rgba(201, 168, 76, 0.12);
+  --border-hover: rgba(201, 168, 76, 0.24);
 
-  /* brutalist sharp edges */
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
+  /* Precise Technical Radii */
+  --radius-sm: 2px;              /* Input fields, select dropdowns, and buttons */
+  --radius-md: 4px;              /* Cards */
+  --radius-lg: 4px;
+  --radius-xl: 4px;
 
   /* Typography Scales */
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "IBM Plex Sans", -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  /* Easing curves */
+  /* Easing curves & transitions (180ms cubic-bezier default) */
   --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
   --max-width: 1200px;
@@ -88,7 +84,7 @@ body {
 
 /* 
    SVG Noise Overlay
-   Applies a tactile screen-print paper texture to eliminate default AI vector flatness
+   Tactile screen-print paper texture overlay
 */
 body::before {
   content: "";
@@ -152,24 +148,26 @@ p {
   margin-bottom: 1rem;
 }
 
-/* Technical monospaced sublabels */
+/* 
+   Technical monospaced uppercase labels
+   Whisper, do not shout: 0.7rem font, 500 weight, 0.12em letter spacing
+*/
 .mono-label {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--accent);
   font-weight: 500;
 }
 
 a {
-  color: var(--accent-light);
+  color: var(--accent);
   text-decoration: none;
-  transition: color 0.18s var(--ease-out);
+  transition: opacity 180ms var(--ease-out);
 }
 
 a:hover {
-  color: var(--accent);
+  opacity: 0.85;
 }
 
 
@@ -188,19 +186,18 @@ a:hover {
 }
 
 
-/*  Brutalist Card  */
+/*  Brutalist Card (Defined by surface level contrast #161310 vs #0D0B08)  */
 .glass-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 0px;
+  border-radius: var(--radius-md);
   padding: 32px;
-  transition: border-color 0.2s var(--ease-out),
-    background-color 0.2s var(--ease-out);
+  transition: border-color 180ms var(--ease-out),
+              background-color 180ms var(--ease-out);
 }
 
 .glass-card:hover {
   border-color: var(--border-hover);
-  background-color: var(--bg-card);
 }
 
 /* Left-accent border option */
@@ -217,26 +214,29 @@ a:hover {
   gap: 10px;
   padding: 14px 32px;
   border: none;
-  border-radius: 0px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.2s var(--ease-out);
+  transition: all 180ms var(--ease-out);
   text-decoration: none;
 }
 
 .btn-primary {
   background: var(--accent);
-  color: var(--bg-primary);
-  border: 1px solid var(--accent);
+  color: var(--text-primary);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  transition: background-color 200ms ease-out,
+              border-color 180ms var(--ease-out),
+              transform 180ms var(--ease-out);
 }
 
 .btn-primary:hover {
-  background: transparent;
-  color: var(--accent);
+  background: var(--accent-secondary);
+  color: var(--text-primary);
   border-color: var(--accent);
   transform: translateY(-2px);
 }
@@ -248,13 +248,13 @@ a:hover {
 .btn-outline {
   background: transparent;
   color: var(--text-primary);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(201, 168, 76, 0.4);
 }
 
 .btn-outline:hover {
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  border-color: var(--text-primary);
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--accent);
   transform: translateY(-2px);
 }
 
@@ -265,7 +265,7 @@ a:hover {
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: 0px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 600;
@@ -292,84 +292,41 @@ a:hover {
 }
 
 
-/*  Animations  */
-@keyframes fadeInUp {
+/*  Entrance Stagger Animations (One orchestrated page load reveal only)  */
+@keyframes heroEntrance {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(14px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+.hero-anim-status {
+  opacity: 0;
+  animation: heroEntrance 400ms var(--ease-out) 0ms forwards;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.hero-anim-title {
+  opacity: 0;
+  animation: heroEntrance 500ms var(--ease-out) 120ms forwards;
 }
 
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.45;
-  }
+.hero-anim-subtitle {
+  opacity: 0;
+  animation: heroEntrance 400ms var(--ease-out) 220ms forwards;
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.4s var(--ease-out) both;
+.hero-anim-actions {
+  opacity: 0;
+  animation: heroEntrance 400ms var(--ease-out) 320ms forwards;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.3s var(--ease-out) both;
-}
-
-/* Precise staggered reveal entries */
-.stagger>*:nth-child(1) {
-  animation-delay: 0ms;
-}
-
-.stagger>*:nth-child(2) {
-  animation-delay: 60ms;
-}
-
-.stagger>*:nth-child(3) {
-  animation-delay: 120ms;
-}
-
-.stagger>*:nth-child(4) {
-  animation-delay: 180ms;
-}
-
-.stagger>*:nth-child(5) {
-  animation-delay: 240ms;
-}
-
-.stagger>*:nth-child(6) {
-  animation-delay: 300ms;
+.hero-anim-card {
+  opacity: 0;
+  animation: heroEntrance 500ms var(--ease-out) 200ms forwards;
 }
 
 
@@ -398,7 +355,6 @@ a:hover {
   .container {
     padding: 0 20px;
   }
-
   .page {
     padding-top: calc(var(--nav-height) + 20px);
     padding-bottom: 40px;
