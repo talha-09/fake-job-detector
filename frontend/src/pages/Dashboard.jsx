@@ -1,9 +1,8 @@
 /**
  * Dashboard.jsx — Model Performance and Visualization Page
  *
- * Fetches accuracy/precision/recall/f1 from GET /api/metrics,
- * renders KPI cards, a Recharts grouped bar chart, confusion matrix
- * images from the backend /static/ directory, and dataset statistics.
+ * Implements flat, technical brutalist charts using customized Recharts instances,
+ * styled KPI ledgers, and raw training dataset parameters.
  */
 
 import { useEffect, useState } from "react";
@@ -19,12 +18,10 @@ import { getMetrics, staticUrl } from "../services/api";
 import "./Dashboard.css";
 
 export default function Dashboard() {
-  // State: metrics data from backend, loading flag, and error message
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch model performance metrics once on page mount
   useEffect(() => {
     getMetrics()
       .then(setMetrics)
@@ -32,40 +29,33 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Show a spinner while the API call is in progress
   if (loading) {
     return (
       <div className="page">
         <div className="container dashboard-loading">
-          <Loader2 size={36} className="dashboard-spinner-icon" />
-          <p>Loading dashboard metrics…</p>
+          <Loader2 size={24} className="dashboard-spinner-icon" />
+          <p className="mono-label animate-pulse">LOADING BENCHMARK METRICS...</p>
         </div>
       </div>
     );
   }
 
-  // Show an error message if the metrics fetch failed
   if (error) {
     return (
       <div className="page">
         <div className="container dashboard-error">
-          <AlertTriangle size={32} />
-          <h2>Failed to Load Metrics</h2>
-          <p>{error}</p>
-          <p style={{ marginTop: 12, color: "var(--text-muted)", fontSize: "0.85rem" }}>
-            Ensure the backend is running on port 8000 and model_metrics.json exists in backend/static/
-          </p>
+          <AlertTriangle size={24} />
+          <h2>Benchmark Loading Error</h2>
+          <p className="mono-label">{error}</p>
         </div>
       </div>
     );
   }
 
-  // Destructure the two model metric objects and dataset info
   const nb = metrics.naive_bayes;
   const lr = metrics.logistic_regression;
   const ds = metrics.dataset;
 
-  // Build chart data — one bar group per metric, comparing NB vs LR
   const chartData = [
     { metric: "Accuracy",  nb: +(nb.accuracy  * 100).toFixed(1), lr: +(lr.accuracy  * 100).toFixed(1) },
     { metric: "Precision", nb: +(nb.precision * 100).toFixed(1), lr: +(lr.precision * 100).toFixed(1) },
@@ -73,10 +63,6 @@ export default function Dashboard() {
     { metric: "F1 Score",  nb: +(nb.f1_score  * 100).toFixed(1), lr: +(lr.f1_score  * 100).toFixed(1) },
   ];
 
-  /**
-   * handleImageLoad — Fades in confusion matrix images after they finish loading
-   * to prevent a jarring flash of unstyled content.
-   */
   function handleImageLoad(e) {
     e.target.classList.add("loaded");
   }
@@ -84,65 +70,65 @@ export default function Dashboard() {
   return (
     <div className="page">
       <div className="container">
-        {/* Page header */}
+        {/* Editorial Page Header */}
         <div className="dashboard-header animate-fade-in-up">
-          <h1>Model Dashboard</h1>
-          <p>Performance metrics and visualizations for both classification models</p>
+          <div className="mono-label">MODEL EVALUATION</div>
+          <h1>System Benchmarks</h1>
+          <p>Performance metrics and visual matrix audits for Naive Bayes and Logistic Regression.</p>
         </div>
 
-        {/* ── KPI Metric Cards — quick overview of best-model performance ── */}
+        {/* Start Asymmetric KPI Ledger */}
         <div className="dashboard-metrics stagger">
-          <div className="glass-card dashboard-metric-card accent animate-fade-in-up">
-            <Target size={22} className="dashboard-metric-icon-svg accent" />
-            <div className="dashboard-metric-value accent">
+          <div className="glass-card dashboard-metric-card accent-card">
+            <Target size={14} className="dashboard-metric-icon-svg" />
+            <div className="dashboard-metric-value">
               {(lr.accuracy * 100).toFixed(1)}%
             </div>
-            <div className="dashboard-metric-label">LR Accuracy</div>
+            <div className="mono-label stat-desc">LR Accuracy</div>
           </div>
 
-          <div className="glass-card dashboard-metric-card green animate-fade-in-up">
-            <CheckCircle2 size={22} className="dashboard-metric-icon-svg green" />
-            <div className="dashboard-metric-value green">
+          <div className="glass-card dashboard-metric-card">
+            <CheckCircle2 size={14} className="dashboard-metric-icon-svg" />
+            <div className="dashboard-metric-value">
               {(lr.precision * 100).toFixed(1)}%
             </div>
-            <div className="dashboard-metric-label">LR Precision</div>
+            <div className="mono-label stat-desc">LR Precision</div>
           </div>
 
-          <div className="glass-card dashboard-metric-card cyan animate-fade-in-up">
-            <Search size={22} className="dashboard-metric-icon-svg cyan" />
-            <div className="dashboard-metric-value cyan">
+          <div className="glass-card dashboard-metric-card">
+            <Search size={14} className="dashboard-metric-icon-svg" />
+            <div className="dashboard-metric-value">
               {(lr.recall * 100).toFixed(1)}%
             </div>
-            <div className="dashboard-metric-label">LR Recall</div>
+            <div className="mono-label stat-desc">LR Recall</div>
           </div>
 
-          <div className="glass-card dashboard-metric-card yellow animate-fade-in-up">
-            <Scale size={22} className="dashboard-metric-icon-svg yellow" />
-            <div className="dashboard-metric-value yellow">
+          <div className="glass-card dashboard-metric-card">
+            <Scale size={14} className="dashboard-metric-icon-svg" />
+            <div className="dashboard-metric-value">
               {(lr.f1_score * 100).toFixed(1)}%
             </div>
-            <div className="dashboard-metric-label">LR F1 Score</div>
+            <div className="mono-label stat-desc">LR F1 Score</div>
           </div>
         </div>
 
-        {/* ── Two-column: comparison table + bar chart ──────────────────── */}
+        {/* Asymmetrical Grid: Comparison Table + Customized Recharts */}
         <div className="dashboard-grid">
-          {/* Left: side-by-side performance comparison table */}
+          {/* Comparison Table */}
           <div className="glass-card animate-fade-in-up">
-            <div className="dashboard-card-title">
-              <LayoutGrid size={16} />
-              Model Comparison
+            <div className="dashboard-card-title mono-label">
+              <LayoutGrid size={13} />
+              Evaluation Ledger
             </div>
             <table className="dashboard-table">
               <thead>
                 <tr>
-                  <th>Metric</th>
-                  <th>Naive Bayes</th>
-                  <th>Logistic Regression</th>
+                  <th className="mono-label">METRIC PARAMETER</th>
+                  <th className="mono-label">NAIVE BAYES</th>
+                  <th className="mono-label">LOGISTIC REGRESSION</th>
                 </tr>
               </thead>
               <tbody>
-                {/* Each row compares one metric across both models */}
                 {[
                   ["Accuracy",  nb.accuracy,  lr.accuracy],
                   ["Precision", nb.precision, lr.precision],
@@ -151,10 +137,10 @@ export default function Dashboard() {
                 ].map(([label, nbVal, lrVal]) => (
                   <tr key={label}>
                     <td>{label}</td>
-                    <td className={`value-cell ${nbVal > lrVal ? "highlight" : ""}`}>
+                    <td className={`value-cell ${nbVal > lrVal ? "highlight-nb" : ""}`}>
                       {(nbVal * 100).toFixed(1)}%
                     </td>
-                    <td className={`value-cell ${lrVal >= nbVal ? "highlight" : ""}`}>
+                    <td className={`value-cell ${lrVal >= nbVal ? "highlight-lr" : ""}`}>
                       {(lrVal * 100).toFixed(1)}%
                     </td>
                   </tr>
@@ -163,46 +149,57 @@ export default function Dashboard() {
             </table>
           </div>
 
-          {/* Right: Recharts grouped bar chart for visual comparison */}
+          {/* Grouped Bar Chart Override */}
           <div className="glass-card animate-fade-in-up">
-            <div className="dashboard-card-title">
-              <TrendingUp size={16} />
-              Performance Overview
+            <div className="dashboard-card-title mono-label">
+              <TrendingUp size={13} />
+              Statistical Bar Graph
             </div>
             <div className="dashboard-chart-container">
               <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={chartData} barGap={4}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <BarChart data={chartData} barGap={6}>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="0" />
                   <XAxis
                     dataKey="metric"
-                    tick={{ fill: "#8b8da3", fontSize: 12 }}
-                    axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
+                    tick={{ fill: "#aba69a", fontSize: 10, fontFamily: "var(--font-mono)" }}
+                    axisLine={{ stroke: "var(--border)" }}
+                    tickLine={{ stroke: "var(--border)" }}
                   />
                   <YAxis
                     domain={[0, 100]}
-                    tick={{ fill: "#8b8da3", fontSize: 12 }}
-                    axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
+                    tick={{ fill: "#aba69a", fontSize: 10, fontFamily: "var(--font-mono)" }}
+                    axisLine={{ stroke: "var(--border)" }}
+                    tickLine={{ stroke: "var(--border)" }}
                     tickFormatter={(v) => `${v}%`}
                   />
                   <Tooltip
+                    cursor={{ fill: "rgba(242, 237, 228, 0.03)" }}
                     contentStyle={{
-                      background: "#1e1f2e",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: 8,
-                      color: "#e4e5f1",
-                      fontSize: 13,
+                      background: "var(--bg-secondary)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "0px",
+                      color: "var(--text-primary)",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
                     }}
                     formatter={(v) => `${v}%`}
                   />
-                  <Legend wrapperStyle={{ fontSize: 12, color: "#8b8da3" }} />
-                  <Bar dataKey="nb" name="Naive Bayes" radius={[4,4,0,0]}>
+                  <Legend 
+                    wrapperStyle={{ 
+                      fontSize: 10, 
+                      fontFamily: "var(--font-mono)", 
+                      color: "var(--text-secondary)",
+                      paddingTop: 12
+                    }} 
+                  />
+                  <Bar dataKey="nb" name="Naive Bayes" radius={0}>
                     {chartData.map((_, i) => (
-                      <Cell key={i} fill="#6366f1" />
+                      <Cell key={i} fill="#aba69a" />
                     ))}
                   </Bar>
-                  <Bar dataKey="lr" name="Logistic Regression" radius={[4,4,0,0]}>
+                  <Bar dataKey="lr" name="Logistic Regression" radius={0}>
                     {chartData.map((_, i) => (
-                      <Cell key={i} fill="#a78bfa" />
+                      <Cell key={i} fill="#c5a65c" />
                     ))}
                   </Bar>
                 </BarChart>
@@ -211,11 +208,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Confusion matrix images generated by evaluate.py ──────────── */}
+        {/* Backend Confusion Matrices Grid */}
         <div className="dashboard-confusion-grid stagger">
           <div className="glass-card dashboard-confusion-card animate-fade-in-up">
-            <div className="dashboard-card-title">
-              Naive Bayes — Confusion Matrix
+            <div className="dashboard-card-title mono-label">
+              NAIVE BAYES — CONFUSION MATRIX
             </div>
             <img
               src={staticUrl("nb_confusion_matrix.png")}
@@ -226,8 +223,8 @@ export default function Dashboard() {
           </div>
 
           <div className="glass-card dashboard-confusion-card animate-fade-in-up">
-            <div className="dashboard-card-title">
-              Logistic Regression — Confusion Matrix
+            <div className="dashboard-card-title mono-label">
+              LOGISTIC REGRESSION — CONFUSION MATRIX
             </div>
             <img
               src={staticUrl("lr_confusion_matrix.png")}
@@ -238,33 +235,33 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Dataset statistics — training data overview ───────────────── */}
+        {/* Dataset balance ledger sheet */}
         <div className="glass-card dashboard-dataset animate-fade-in-up">
-          <div className="dashboard-card-title" style={{ width: "100%", justifyContent: "center" }}>
-            <Database size={16} />
-            Training Dataset
+          <div className="dashboard-card-title mono-label" style={{ width: "100%", justifyContent: "center" }}>
+            <Database size={13} />
+            Training Corpus Baseline Log
           </div>
           <div className="dashboard-dataset-item">
             <div className="dashboard-dataset-value">{ds.total_rows.toLocaleString()}</div>
-            <div className="dashboard-dataset-label">Total Records</div>
+            <div className="mono-label text-dim">Total Corpus Records</div>
           </div>
           <div className="dashboard-dataset-item">
             <div className="dashboard-dataset-value" style={{ color: "var(--green)" }}>
               {ds.real_postings.toLocaleString()}
             </div>
-            <div className="dashboard-dataset-label">Legitimate</div>
+            <div className="mono-label text-dim">Legitimate Rows</div>
           </div>
           <div className="dashboard-dataset-item">
             <div className="dashboard-dataset-value" style={{ color: "var(--red)" }}>
               {ds.fake_postings.toLocaleString()}
             </div>
-            <div className="dashboard-dataset-label">Fraudulent</div>
+            <div className="mono-label text-dim">Fraudulent Rows</div>
           </div>
           <div className="dashboard-dataset-item">
-            <div className="dashboard-dataset-value" style={{ color: "var(--yellow)" }}>
+            <div className="dashboard-dataset-value" style={{ color: "var(--accent)" }}>
               {ds.fake_percent}%
             </div>
-            <div className="dashboard-dataset-label">Fraud Rate</div>
+            <div className="mono-label text-dim">Native Fraud Ratio</div>
           </div>
         </div>
       </div>

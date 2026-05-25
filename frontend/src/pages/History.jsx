@@ -1,29 +1,23 @@
 /**
  * History.jsx — Prediction History Page
  *
- * Fetches all past predictions from GET /api/history and GET /api/stats,
- * then renders a summary statistics bar and a styled table with color-coded
- * badges, confidence scores, model identifiers, and timestamps.
+ * Implements a Technical Brutalist ledger sheet detailing past classification records
+ * with flat tabular grids, monospace technical keys, and sharp status badges.
  */
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Search, Loader2, ShieldCheck, ShieldAlert,
-  CircleAlert, CircleDot, CircleCheck,
 } from "lucide-react";
 import { getHistory, getStats } from "../services/api";
 import "./History.css";
 
 export default function History() {
-  // Holds the array of past prediction records from the backend
   const [records, setRecords] = useState([]);
-  // Holds aggregate stats: total predictions, fake count, real count
   const [stats, setStats] = useState(null);
-  // Tracks whether the API calls are still in flight
   const [loading, setLoading] = useState(true);
 
-  // Fetch history records and stats once on component mount
   useEffect(() => {
     Promise.all([getHistory(), getStats()])
       .then(([historyData, statsData]) => {
@@ -34,13 +28,12 @@ export default function History() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Display a spinner while waiting for the API response
   if (loading) {
     return (
       <div className="page">
         <div className="container history-loading">
-          <Loader2 size={36} className="history-spinner-icon" />
-          <p>Loading prediction history…</p>
+          <Loader2 size={24} className="history-spinner-icon" />
+          <p className="mono-label animate-pulse">QUERYING LOCAL DB LOGS...</p>
         </div>
       </div>
     );
@@ -49,77 +42,76 @@ export default function History() {
   return (
     <div className="page">
       <div className="container">
-        {/* Page heading */}
+        {/* Editorial Section Header */}
         <div className="history-header animate-fade-in-up">
-          <h1>Prediction History</h1>
-          <p>Review all past job posting analyses</p>
+          <div className="mono-label">DATABASE TRANSACTION HISTORY</div>
+          <h1>Audit Ledger</h1>
+          <p>Historical database of processed job listings and structural scam scans.</p>
         </div>
 
-        {/* Stats summary bar — aggregate counts above the table */}
+        {/* Minimal Stats Row */}
         {stats && (
           <div className="history-stats stagger">
-            <div className="glass-card history-stat animate-fade-in-up">
-              <div className="history-stat-value" style={{ color: "var(--accent-light)" }}>
+            <div className="glass-card history-stat accent-card">
+              <div className="history-stat-value">
                 {stats.total_predictions}
               </div>
-              <div className="history-stat-label">Total Analyses</div>
+              <div className="mono-label stat-desc">Total Audits</div>
             </div>
-            <div className="glass-card history-stat animate-fade-in-up">
+            <div className="glass-card history-stat">
               <div className="history-stat-value" style={{ color: "var(--green)" }}>
                 {stats.real_count}
               </div>
-              <div className="history-stat-label">Legitimate</div>
+              <div className="mono-label stat-desc">Verified Legit</div>
             </div>
-            <div className="glass-card history-stat animate-fade-in-up">
+            <div className="glass-card history-stat">
               <div className="history-stat-value" style={{ color: "var(--red)" }}>
                 {stats.fake_count}
               </div>
-              <div className="history-stat-label">Fraudulent</div>
+              <div className="mono-label stat-desc">Flagged Fraud</div>
             </div>
           </div>
         )}
 
-        {/* Main content: prediction table or empty state */}
+        {/* Main Content Ledger */}
         {records.length === 0 ? (
-          /* Empty state — no predictions have been recorded yet */
           <div className="glass-card history-empty animate-fade-in-up">
-            <Search size={36} className="history-empty-icon" />
-            <h3>No Predictions Yet</h3>
-            <p>Submit a job posting for analysis to see results here.</p>
-            <Link to="/analyze" className="btn btn-primary">
-              <Search size={16} />
-              Analyze a Posting
+            <Search size={28} className="history-empty-icon" />
+            <h3>Ledger Empty</h3>
+            <p className="mono-label">No previous scans have been recorded in the database.</p>
+            <Link to="/analyze" className="btn btn-primary" style={{ marginTop: 16 }}>
+              <Search size={13} />
+              Scan a Posting
             </Link>
           </div>
         ) : (
-          /* Prediction history table — one row per past analysis */
           <div className="glass-card history-table-wrapper animate-fade-in-up">
             <table className="history-table" id="history-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Job Text</th>
-                  <th>Result</th>
-                  <th>Confidence</th>
-                  <th>Risk</th>
-                  <th>Model</th>
-                  <th>Date</th>
+                  <th className="mono-label">#</th>
+                  <th className="mono-label">CORPUS TEXT SCAN</th>
+                  <th className="mono-label">VERDICT</th>
+                  <th className="mono-label">CONFIDENCE</th>
+                  <th className="mono-label">RISK CLASS</th>
+                  <th className="mono-label">ENGINE</th>
+                  <th className="mono-label">DATE RECORDED</th>
                 </tr>
               </thead>
               <tbody>
                 {records.map((rec, i) => (
                   <tr key={rec.id}>
-                    {/* Row index */}
-                    <td style={{ color: "var(--text-muted)" }}>{i + 1}</td>
+                    {/* Index */}
+                    <td className="history-index mono-label">{i + 1}</td>
 
-                    {/* Truncated job text — hover for full content */}
+                    {/* Truncated job description */}
                     <td className="history-text-cell" title={rec.job_text}>
-                      {rec.job_text.length > 80
-                        ? rec.job_text.slice(0, 80) + "…"
+                      {rec.job_text.length > 70
+                        ? rec.job_text.slice(0, 70) + "..."
                         : rec.job_text}
                     </td>
 
-                    {/* Classification badge — color-coded for instant recognition */}
+                    {/* Classification square badge */}
                     <td>
                       <span
                         className={`badge ${
@@ -127,19 +119,19 @@ export default function History() {
                         }`}
                       >
                         {rec.prediction === "Fake"
-                          ? <ShieldAlert size={12} />
-                          : <ShieldCheck size={12} />
+                          ? <ShieldAlert size={10} />
+                          : <ShieldCheck size={10} />
                         }
-                        {rec.prediction === "Fake" ? "Fake" : "Real"}
+                        {rec.prediction === "Fake" ? "Scam" : "Legit"}
                       </span>
                     </td>
 
-                    {/* Confidence percentage */}
-                    <td className="history-confidence">
+                    {/* Tabular numeric confidence */}
+                    <td className="history-confidence mono-label">
                       {(rec.confidence * 100).toFixed(1)}%
                     </td>
 
-                    {/* Risk level badge */}
+                    {/* Risk Badge */}
                     <td>
                       <span
                         className={`badge ${
@@ -154,21 +146,21 @@ export default function History() {
                       </span>
                     </td>
 
-                    {/* Model identifier */}
-                    <td>
-                      <span className="history-model">
-                        {rec.model_used === "logistic_regression" ? "LR" : "NB"}
-                      </span>
+                    {/* Engine Identifier */}
+                    <td className="history-model mono-label">
+                      {rec.model_used === "logistic_regression" ? "LR_V1" : "NB_V1"}
                     </td>
 
-                    {/* Timestamp */}
-                    <td className="history-date">
+                    {/* Monospace simple timestamp */}
+                    <td className="history-date mono-label">
                       {new Date(rec.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
                         hour: "2-digit",
                         minute: "2-digit",
-                      })}
+                        hour12: false
+                      }).replace(',', '')}
                     </td>
                   </tr>
                 ))}

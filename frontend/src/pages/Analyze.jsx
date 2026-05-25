@@ -1,10 +1,9 @@
 /**
- * Analyze.jsx — Core prediction interface for job posting classification.
+ * Analyze.jsx — Mathematical vector analysis form.
  *
- * Provides a textarea for pasting job descriptions, a model selector dropdown,
- * and a submit button. After classification, displays a detailed result card
- * with verdict, confidence bar, risk level, flagged keywords, and explanation.
- * This page demonstrates the Explainable AI aspect of the system.
+ * Implements a Technical Brutalist scan workspace and outputs results styled
+ * as an official "Audit Memorandum". Features crisp monospace diagnostic metrics
+ * and sharp-edged visual indicators.
  */
 
 import { useState } from "react";
@@ -17,26 +16,16 @@ import { predictJob } from "../services/api";
 import "./Analyze.css";
 
 export default function Analyze() {
-  // The raw job posting text entered by the user in the textarea
   const [jobText, setJobText] = useState("");
-  // Which ML model to use — defaults to LR since it has higher accuracy
   const [modelName, setModelName] = useState("logistic_regression");
-  // Whether an API request is currently in flight
   const [loading, setLoading] = useState(false);
-  // Error message to display if the API call fails or input is invalid
   const [error, setError] = useState(null);
-  // The prediction result object returned from the backend
   const [result, setResult] = useState(null);
 
-  /**
-   * handleSubmit — Validates input length, calls the prediction API,
-   * and stores the result or error in state for rendering.
-   */
   async function handleSubmit(e) {
     e.preventDefault();
-    // Backend requires at least 20 characters for meaningful text analysis
     if (jobText.trim().length < 20) {
-      setError("Please enter at least 20 characters of job posting text.");
+      setError("Input underlength. Please enter at least 20 characters of job text.");
       return;
     }
 
@@ -45,143 +34,163 @@ export default function Analyze() {
     setResult(null);
 
     try {
-      // Send text to POST /api/predict and get back the classification result
       const data = await predictJob(jobText, modelName);
       setResult(data);
     } catch (err) {
-      // Extract the most useful error message from the Axios error object
       const msg =
-        err.response?.data?.detail || err.message || "An unexpected error occurred.";
+        err.response?.data?.detail || err.message || "An unexpected system error occurred.";
       setError(msg);
     } finally {
       setLoading(false);
     }
   }
 
-  /**
-   * handleReset — Clears the result and input so the user can analyze another posting.
-   */
   function handleReset() {
     setResult(null);
     setError(null);
     setJobText("");
   }
 
-  // Convenience flag to determine color scheme (red for fake, green for real)
   const isFake = result?.prediction === "Fake";
 
   return (
     <div className="page">
       <div className="container">
-        {/* Page header */}
+        {/* Editorial Section Header */}
         <div className="analyze-header animate-fade-in-up">
-          <h1>Analyze Job Posting</h1>
-          <p>Submit a job description to classify it as legitimate or fraudulent</p>
+          <div className="mono-label">VERIFICATION WORKSPACE</div>
+          <h1>Audit Job Posting</h1>
+          <p>We parse lexical patterns to verify legitimacy against 17,880 historic job postings.</p>
         </div>
 
-        {/* ── Input Form — shown only when there's no result or loading state ── */}
+        {/* Input Form — shown only when no result is loaded */}
         {!result && !loading && (
-          <form onSubmit={handleSubmit}>
-            <div className="glass-card analyze-input-card animate-fade-in-up">
-              {/* Textarea where the user pastes the full job posting text */}
+          <form onSubmit={handleSubmit} className="animate-fade-in-up">
+            <div className="glass-card analyze-input-card">
+              <div className="textarea-terminal-header">
+                <span className="terminal-dot red" />
+                <span className="terminal-dot yellow" />
+                <span className="terminal-dot green" />
+                <span className="terminal-filename">job_description.txt</span>
+              </div>
+              
               <textarea
                 id="job-text-input"
                 className="analyze-textarea"
-                placeholder="Paste the full job posting text here...
-
-Example: We are looking for a Software Engineer to join our growing team. Requirements include 3+ years of Python experience, knowledge of REST APIs..."
+                placeholder="Paste the full job description or email correspondence here... (minimum 20 characters)"
                 value={jobText}
                 onChange={(e) => setJobText(e.target.value)}
                 maxLength={10000}
               />
 
               <div className="analyze-controls">
-                {/* Model selector — lets users choose between NB and LR models */}
+                {/* Asymmetric dropdown */}
                 <div className="analyze-model-select">
-                  <label htmlFor="model-select">Model:</label>
+                  <label htmlFor="model-select" className="mono-label">CLASSIFIER MODEL:</label>
                   <select
                     id="model-select"
                     value={modelName}
                     onChange={(e) => setModelName(e.target.value)}
                   >
                     <option value="logistic_regression">
-                      Logistic Regression (Recommended)
+                      Logistic Regression [98.0% Accuracy]
                     </option>
-                    <option value="naive_bayes">Naive Bayes</option>
+                    <option value="naive_bayes">
+                      Naive Bayes [90.7% Accuracy]
+                    </option>
                   </select>
                 </div>
 
-                {/* Character counter — helps users gauge input length */}
-                <span className="analyze-char-count">
-                  {jobText.length.toLocaleString()} / 10,000
+                <span className="analyze-char-count mono-label">
+                  {jobText.length.toLocaleString()} / 10,000 BYTES
                 </span>
 
-                {/* Submit button — disabled until minimum 20 characters are entered */}
                 <button
                   type="submit"
                   className="btn btn-primary analyze-submit"
                   id="analyze-btn"
                   disabled={jobText.trim().length < 20}
                 >
-                  <Search size={16} />
-                  Analyze
+                  <Search size={13} />
+                  Analyze Text
                 </button>
               </div>
             </div>
           </form>
         )}
 
-        {/* Error banner — shown if validation fails or the API returns an error */}
+        {/* Error Flag Banner */}
         {error && (
-          <div className="analyze-error" role="alert">
-            <AlertTriangle size={16} />
-            {error}
+          <div className="analyze-error mono-label" role="alert">
+            <AlertTriangle size={14} />
+            ERROR: {error}
           </div>
         )}
 
-        {/* Loading state — visible while waiting for the backend response */}
+        {/* Technical Loading Status */}
         {loading && (
           <div className="analyze-loading glass-card">
-            <Loader2 size={36} className="analyze-spinner-icon" />
-            <p>
-              Classifying with{" "}
+            <Loader2 size={24} className="analyze-spinner-icon" />
+            <p className="mono-label animate-pulse">
+              TOKENISING TEXT VIA TF-IDF VECTORISER... Running{" "}
               {modelName === "logistic_regression"
-                ? "Logistic Regression"
-                : "Naive Bayes"}
-              …
+                ? "LOGISTIC_REGRESSION_MODEL"
+                : "NAIVE_BAYES_MODEL"}
+              ...
             </p>
           </div>
         )}
 
-        {/* ── Result Card — displayed after a successful prediction ─────── */}
+        {/* Technical Brutalist Audit Memorandum Report */}
         {result && (
-          <>
-            <div className="analyze-result" id="analyze-result">
-              {/* Verdict header — prominent label with colored background */}
-              <div className={`analyze-verdict ${isFake ? "fake" : "real"}`}>
-                <div className="analyze-verdict-icon-wrap">
-                  {isFake
-                    ? <ShieldAlert size={40} strokeWidth={1.5} />
-                    : <ShieldCheck size={40} strokeWidth={1.5} />
-                  }
+          <div className="result-container animate-fade-in-up">
+            <div className={`analyze-result ${isFake ? "scam-audit" : "safe-audit"}`}>
+              
+              {/* Memorandum Header Block */}
+              <div className="memo-header-block">
+                <div className="memo-brand-stamp">
+                  <div className="stamp-title">JOBGUARD SCANNER</div>
+                  <div className="stamp-id mono-label">ID: {Math.floor(Math.random() * 900000 + 100000)}</div>
                 </div>
-                <div className="analyze-verdict-label">
-                  {isFake ? "Fraudulent Posting Detected" : "Legitimate Posting"}
+
+                <div className="verdict-banner">
+                  <div className="verdict-icon-wrap">
+                    {isFake
+                      ? <ShieldAlert size={28} />
+                      : <ShieldCheck size={28} />
+                    }
+                  </div>
+                  <div className="verdict-text-group">
+                    <div className="memo-label">AUDIT MEMORANDUM VERDICT</div>
+                    <div className="verdict-large-title">
+                      {isFake ? "FLAGGED: HIGH RISK OF SCAM" : "VERIFIED: LOW RISK / LEGITIMATE"}
+                    </div>
+                  </div>
                 </div>
-                <div className="analyze-verdict-model">
-                  Classified using{" "}
-                  {result.model_used === "logistic_regression"
-                    ? "Logistic Regression"
-                    : "Naive Bayes"}
+
+                <div className="metadata-grid">
+                  <div className="meta-item">
+                    <span className="meta-key mono-label">SCAN TIMESTAMP:</span>
+                    <span className="meta-val mono-label">{new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-key mono-label">AUDIT ENGINE:</span>
+                    <span className="meta-val mono-label">
+                      {result.model_used === "logistic_regression"
+                        ? "LOGISTIC_REGRESSION_V1"
+                        : "NAIVE_BAYES_V1"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Detailed breakdown — confidence, risk, keywords, explanation */}
+              {/* Statistical Ledger Breakdown */}
               <div className="analyze-details">
-                {/* Confidence score — animated progress bar showing model certainty */}
+                
+                {/* Row 1: Model Certainty */}
                 <div className="analyze-detail-row">
-                  <div className="analyze-detail-label">
-                    <TrendingUp size={14} />
+                  <div className="analyze-detail-label mono-label">
+                    <TrendingUp size={12} />
                     Confidence
                   </div>
                   <div className="analyze-detail-value">
@@ -191,17 +200,16 @@ Example: We are looking for a Software Engineer to join our growing team. Requir
                         style={{ width: `${(result.confidence * 100).toFixed(1)}%` }}
                       />
                     </div>
-                    <div className="analyze-confidence-text">
-                      <strong>{(result.confidence * 100).toFixed(1)}%</strong>{" "}
-                      confidence
+                    <div className="analyze-confidence-text mono-label">
+                      CLASSIFIER PROBABILITY COEFFICIENT: <strong>{(result.confidence * 100).toFixed(1)}%</strong>
                     </div>
                   </div>
                 </div>
 
-                {/* Risk level — High/Medium/Low indicator based on confidence */}
+                {/* Row 2: Risk Class */}
                 <div className="analyze-detail-row">
-                  <div className="analyze-detail-label">
-                    <CircleAlert size={14} />
+                  <div className="analyze-detail-label mono-label">
+                    <CircleAlert size={12} />
                     Risk Level
                   </div>
                   <div className="analyze-detail-value">
@@ -209,38 +217,38 @@ Example: We are looking for a Software Engineer to join our growing team. Requir
                       {result.risk_level === "High" && <CircleAlert size={12} />}
                       {result.risk_level === "Medium" && <CircleDot size={12} />}
                       {result.risk_level === "Low" && <CircleCheck size={12} />}
-                      {result.risk_level} Risk
+                      [{result.risk_level} Risk Class]
                     </span>
                   </div>
                 </div>
 
-                {/* Flagged keywords — terms matching known fraud patterns */}
+                {/* Row 3: Flagged Lexical Markers */}
                 <div className="analyze-detail-row">
-                  <div className="analyze-detail-label">
-                    <Tag size={14} />
-                    Flagged Keywords
+                  <div className="analyze-detail-label mono-label">
+                    <Tag size={12} />
+                    Lexical Keys
                   </div>
                   <div className="analyze-detail-value">
                     {result.suspicious_keywords.length > 0 ? (
                       <div className="analyze-keywords">
                         {result.suspicious_keywords.map((kw, i) => (
-                          <span key={i} className="analyze-keyword-tag">
-                            {kw}
+                          <span key={i} className="analyze-keyword-tag mono-label">
+                            [{kw}]
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="analyze-no-keywords">
-                        No suspicious keywords identified
+                      <span className="analyze-no-keywords mono-label text-dim">
+                        NO HIGH-WEIGHT SUSPICIOUS PATTERNS MATCHED
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* AI explanation — human-readable reasoning behind the decision */}
+                {/* Row 4: Narrative Reasoning */}
                 <div className="analyze-detail-row">
-                  <div className="analyze-detail-label">
-                    <FileText size={14} />
+                  <div className="analyze-detail-label mono-label">
+                    <FileText size={12} />
                     Explanation
                   </div>
                   <div className="analyze-detail-value">
@@ -252,18 +260,18 @@ Example: We are looking for a Software Engineer to join our growing team. Requir
               </div>
             </div>
 
-            {/* Button to clear results and submit another posting */}
+            {/* Form reset button */}
             <div className="analyze-again">
               <button
                 className="btn btn-outline"
                 onClick={handleReset}
                 id="analyze-again-btn"
               >
-                <ArrowLeft size={16} />
-                Analyze Another
+                <ArrowLeft size={13} />
+                Scan Another Posting
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

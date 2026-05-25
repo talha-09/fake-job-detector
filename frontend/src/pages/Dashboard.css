@@ -1,157 +1,96 @@
 /*   
-   Dashboard Page — Model performance metrics & visualizations
-   Shows accuracy cards, comparison charts, and confusion matrices
-   loaded from the backend's /static/ and /api/metrics endpoints.
-      */
+   ==========================================================================
+   Dashboard Page — Technical Benchmark & Diagnostic Styles
+   ==========================================================================
+*/
 
 .dashboard-header {
-  text-align: center;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
   margin-bottom: 40px;
 }
 
 .dashboard-header h1 {
-  font-size: 2.25rem;
-  margin-bottom: 8px;
+  font-size: 2.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-top: 6px;
+  margin-bottom: 0;
 }
 
-/*   Metric Cards — Top-level KPI tiles     */
+/* KPI Tiles (Sharp & Minimalist) */
 .dashboard-metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 36px;
+  gap: 20px;
+  margin-bottom: 48px;
 }
 
 .dashboard-metric-card {
-  text-align: center;
-  padding: 24px 16px;
-  position: relative;
-  overflow: hidden;
+  text-align: left;
+  padding: 28px 24px;
 }
 
-/* Subtle gradient glow behind each metric card for depth */
+/* Remove glow overlays */
 .dashboard-metric-card::before {
-  content: "";
-  position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  opacity: 0.12;
-  pointer-events: none;
-}
-
-.dashboard-metric-card.accent::before {
-  background: var(--accent);
-}
-
-.dashboard-metric-card.green::before {
-  background: var(--green);
-}
-
-.dashboard-metric-card.cyan::before {
-  background: var(--cyan);
-}
-
-.dashboard-metric-card.yellow::before {
-  background: var(--yellow);
+  display: none;
 }
 
 .dashboard-metric-icon-svg {
-  display: block;
-  margin: 0 auto 8px;
-  color: var(--text-muted);
-}
-
-.dashboard-metric-icon-svg.accent {
-  color: var(--accent-light);
-}
-
-.dashboard-metric-icon-svg.green {
-  color: var(--green);
-}
-
-.dashboard-metric-icon-svg.cyan {
-  color: var(--cyan);
-}
-
-.dashboard-metric-icon-svg.yellow {
-  color: var(--yellow);
+  color: var(--accent);
+  margin-bottom: 16px;
 }
 
 .dashboard-metric-value {
-  font-size: 2rem;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
   font-weight: 800;
-  line-height: 1.2;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: -0.03em;
 }
 
-.dashboard-metric-value.accent {
-  color: var(--accent-light);
-}
-
-.dashboard-metric-value.green {
-  color: var(--green);
-}
-
-.dashboard-metric-value.cyan {
-  color: var(--cyan);
-}
-
-.dashboard-metric-value.yellow {
-  color: var(--yellow);
-}
-
-.dashboard-metric-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 500;
-  margin-top: 4px;
-}
-
-/*   Two-column layout for comparison tables & charts*/
+/* Asymmetric Grid Layout */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 36px;
+  gap: 28px;
+  margin-bottom: 48px;
 }
 
-/*   Section titles inside cards*/
 .dashboard-card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-/*   Performance comparison table — NB vs LR side by side      */
+/* Technical Balance-Sheet Comparison Table */
 .dashboard-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
 }
 
 .dashboard-table th {
   text-align: left;
-  padding: 10px 12px;
+  padding: 12px 14px;
   color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  border-bottom: 2px solid var(--border);
 }
 
 .dashboard-table td {
-  padding: 12px;
+  padding: 16px 14px;
   border-bottom: 1px solid var(--border);
   color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .dashboard-table tr:last-child td {
@@ -159,59 +98,60 @@
 }
 
 .dashboard-table .value-cell {
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dashboard-table .highlight-nb {
   color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
 }
 
-.dashboard-table .highlight {
-  color: var(--green);
+.dashboard-table .highlight-lr {
+  color: var(--accent);
 }
 
-/*   Chart container — holds Recharts or static images*/
+/* Recharts Flat Box wrapper */
 .dashboard-chart-container {
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 280px;
+  padding: 16px 0;
+  min-height: 260px;
+  width: 100%;
 }
 
-/*   Confusion matrix images loaded from backend /static/      */
+/* Confusion Matrix Double-Border Framed Blocks */
 .dashboard-confusion-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 36px;
+  grid-template-columns: 1.0fr 1.0fr;
+  gap: 28px;
+  margin-bottom: 48px;
 }
 
 .dashboard-confusion-card {
-  padding: 24px;
+  padding: 32px;
 }
 
 .dashboard-confusion-img {
   width: 100%;
   height: auto;
-  border-radius: var(--radius-sm);
+  border-radius: 0px;
   border: 1px solid var(--border);
   background: var(--bg-input);
-  /* Smooth loading transition so images don't flash in */
   opacity: 0;
-  transition: opacity 0.4s var(--ease-out);
+  transition: opacity 0.3s var(--ease-out);
 }
 
 .dashboard-confusion-img.loaded {
   opacity: 1;
 }
 
-/*Dataset info bar — shows training data statistics*/
+/* Corpus Baseline Ledger Balance */
 .dashboard-dataset {
-  padding: 24px;
+  padding: 36px 24px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 24px;
 }
 
 .dashboard-dataset-item {
@@ -219,54 +159,70 @@
 }
 
 .dashboard-dataset-value {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
   color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 
-.dashboard-dataset-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 2px;
-}
-
-/* Loading skeleton — pulsing placeholder while data loads*/
+/* Technical spinner loading skeleton */
 .dashboard-loading {
   text-align: center;
-  padding: 80px 20px;
+  padding: 100px 32px;
 }
 
 .dashboard-spinner-icon {
-  color: var(--accent-light);
-  animation: spin 1s linear infinite;
+  color: var(--accent);
+  animation: spin 0.8s linear infinite;
   display: block;
-  margin: 0 auto 16px;
+  margin: 0 auto 20px;
 }
 
-/* Error banner — shown if /api/metrics fails*/
 .dashboard-error {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 32px;
   color: var(--red);
 }
 
-/*   Responsive — stack columns on mobile*/
+.dashboard-error h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+
+/* Responsive Scales */
+@media (max-width: 992px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-metrics {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .dashboard-confusion-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .dashboard-dataset {
     flex-direction: column;
+    align-items: flex-start;
+    padding: 32px;
+    gap: 24px;
+  }
+
+  .dashboard-dataset-item {
+    text-align: left;
   }
 }

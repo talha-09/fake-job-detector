@@ -31,10 +31,10 @@ export default function Navbar() {
         {/* Brand logo — clicking navigates to the home page */}
         <Link to="/" className="navbar-brand" onClick={() => setOpen(false)}>
           <div className="navbar-brand-icon">
-            <Shield size={18} strokeWidth={2.5} />
+            <Shield size={15} strokeWidth={2.5} />
           </div>
           <div className="navbar-brand-text">
-            <span>JobGuard</span> AI
+            <span>JobGuard</span>
           </div>
         </Link>
 
