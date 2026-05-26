@@ -3,6 +3,7 @@
  *
  * Implements flat, technical brutalist charts using customized Recharts instances,
  * styled KPI ledgers, and raw training dataset parameters.
+ * Compares XGBoost (primary) vs Logistic Regression (secondary).
  */
 
 import { useEffect, useState } from "react";
@@ -52,15 +53,15 @@ export default function Dashboard() {
     );
   }
 
-  const nb = metrics.naive_bayes;
+  const xgb = metrics.xgboost;
   const lr = metrics.logistic_regression;
   const ds = metrics.dataset;
 
   const chartData = [
-    { metric: "Accuracy",  nb: +(nb.accuracy  * 100).toFixed(1), lr: +(lr.accuracy  * 100).toFixed(1) },
-    { metric: "Precision", nb: +(nb.precision * 100).toFixed(1), lr: +(lr.precision * 100).toFixed(1) },
-    { metric: "Recall",    nb: +(nb.recall    * 100).toFixed(1), lr: +(lr.recall    * 100).toFixed(1) },
-    { metric: "F1 Score",  nb: +(nb.f1_score  * 100).toFixed(1), lr: +(lr.f1_score  * 100).toFixed(1) },
+    { metric: "Accuracy",  xgb: +(xgb.accuracy  * 100).toFixed(1), lr: +(lr.accuracy  * 100).toFixed(1) },
+    { metric: "Precision", xgb: +(xgb.precision * 100).toFixed(1), lr: +(lr.precision * 100).toFixed(1) },
+    { metric: "Recall",    xgb: +(xgb.recall    * 100).toFixed(1), lr: +(lr.recall    * 100).toFixed(1) },
+    { metric: "F1 Score",  xgb: +(xgb.f1_score  * 100).toFixed(1), lr: +(lr.f1_score  * 100).toFixed(1) },
   ];
 
   function handleImageLoad(e) {
@@ -74,41 +75,41 @@ export default function Dashboard() {
         <div className="dashboard-header animate-fade-in-up">
           <div className="mono-label">MODEL EVALUATION</div>
           <h1>System Benchmarks</h1>
-          <p>Performance metrics and visual matrix audits for Naive Bayes and Logistic Regression.</p>
+          <p>Performance metrics and visual matrix audits for XGBoost and Logistic Regression.</p>
         </div>
 
-        {/* Start Asymmetric KPI Ledger */}
+        {/* Start Asymmetric KPI Ledger — XGBoost metrics */}
         <div className="dashboard-metrics stagger">
           <div className="glass-card dashboard-metric-card accent-card">
             <Target size={14} className="dashboard-metric-icon-svg" />
             <div className="dashboard-metric-value">
-              {(lr.accuracy * 100).toFixed(1)}%
+              {(xgb.accuracy * 100).toFixed(1)}%
             </div>
-            <div className="mono-label stat-desc">LR Accuracy</div>
+            <div className="mono-label stat-desc">XGBoost Accuracy</div>
           </div>
 
           <div className="glass-card dashboard-metric-card">
             <CheckCircle2 size={14} className="dashboard-metric-icon-svg" />
             <div className="dashboard-metric-value">
-              {(lr.precision * 100).toFixed(1)}%
+              {(xgb.precision * 100).toFixed(1)}%
             </div>
-            <div className="mono-label stat-desc">LR Precision</div>
+            <div className="mono-label stat-desc">XGBoost Precision</div>
           </div>
 
           <div className="glass-card dashboard-metric-card">
             <Search size={14} className="dashboard-metric-icon-svg" />
             <div className="dashboard-metric-value">
-              {(lr.recall * 100).toFixed(1)}%
+              {(xgb.recall * 100).toFixed(1)}%
             </div>
-            <div className="mono-label stat-desc">LR Recall</div>
+            <div className="mono-label stat-desc">XGBoost Recall</div>
           </div>
 
           <div className="glass-card dashboard-metric-card">
             <Scale size={14} className="dashboard-metric-icon-svg" />
             <div className="dashboard-metric-value">
-              {(lr.f1_score * 100).toFixed(1)}%
+              {(xgb.f1_score * 100).toFixed(1)}%
             </div>
-            <div className="mono-label stat-desc">LR F1 Score</div>
+            <div className="mono-label stat-desc">XGBoost F1 Score</div>
           </div>
         </div>
 
@@ -124,23 +125,23 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th className="mono-label">Metric Parameter</th>
-                  <th className="mono-label">Naive Bayes</th>
+                  <th className="mono-label">XGBoost</th>
                   <th className="mono-label">Logistic Regression</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ["Accuracy",  nb.accuracy,  lr.accuracy],
-                  ["Precision", nb.precision, lr.precision],
-                  ["Recall",    nb.recall,    lr.recall],
-                  ["F1 Score",  nb.f1_score,  lr.f1_score],
-                ].map(([label, nbVal, lrVal]) => (
+                  ["Accuracy",  xgb.accuracy,  lr.accuracy],
+                  ["Precision", xgb.precision, lr.precision],
+                  ["Recall",    xgb.recall,    lr.recall],
+                  ["F1 Score",  xgb.f1_score,  lr.f1_score],
+                ].map(([label, xgbVal, lrVal]) => (
                   <tr key={label}>
                     <td>{label}</td>
-                    <td className={`value-cell ${nbVal > lrVal ? "highlight-nb" : ""}`}>
-                      {(nbVal * 100).toFixed(1)}%
+                    <td className={`value-cell ${xgbVal >= lrVal ? "highlight-xgb" : ""}`}>
+                      {(xgbVal * 100).toFixed(1)}%
                     </td>
-                    <td className={`value-cell ${lrVal >= nbVal ? "highlight-lr" : ""}`}>
+                    <td className={`value-cell ${lrVal > xgbVal ? "highlight-lr" : ""}`}>
                       {(lrVal * 100).toFixed(1)}%
                     </td>
                   </tr>
@@ -192,9 +193,9 @@ export default function Dashboard() {
                       paddingTop: 12
                     }} 
                   />
-                  <Bar dataKey="nb" name="Naive Bayes" radius={0}>
+                  <Bar dataKey="xgb" name="XGBoost" radius={0}>
                     {chartData.map((_, i) => (
-                      <Cell key={i} fill="#aba69a" />
+                      <Cell key={i} fill="#00BCD4" />
                     ))}
                   </Bar>
                   <Bar dataKey="lr" name="Logistic Regression" radius={0}>
@@ -208,15 +209,30 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Backend Confusion Matrices Grid */}
+        {/* Backend Confusion Matrices — Combined image */}
+        <div className="dashboard-confusion-grid stagger">
+          <div className="glass-card dashboard-confusion-card animate-fade-in-up" style={{ gridColumn: "1 / -1" }}>
+            <div className="dashboard-card-title mono-label">
+              CONFUSION MATRICES — LOGISTIC REGRESSION vs XGBOOST
+            </div>
+            <img
+              src={staticUrl("confusion_matrices.png")}
+              alt="Confusion matrices for both models"
+              className="dashboard-confusion-img"
+              onLoad={handleImageLoad}
+            />
+          </div>
+        </div>
+
+        {/* Additional Charts: PR Curves, ROC Curves, Structural Signals */}
         <div className="dashboard-confusion-grid stagger">
           <div className="glass-card dashboard-confusion-card animate-fade-in-up">
             <div className="dashboard-card-title mono-label">
-              NAIVE BAYES — CONFUSION MATRIX
+              PRECISION-RECALL CURVES
             </div>
             <img
-              src={staticUrl("nb_confusion_matrix.png")}
-              alt="Naive Bayes confusion matrix"
+              src={staticUrl("pr_curves.png")}
+              alt="Precision-Recall curves"
               className="dashboard-confusion-img"
               onLoad={handleImageLoad}
             />
@@ -224,11 +240,38 @@ export default function Dashboard() {
 
           <div className="glass-card dashboard-confusion-card animate-fade-in-up">
             <div className="dashboard-card-title mono-label">
-              LOGISTIC REGRESSION — CONFUSION MATRIX
+              ROC CURVES
             </div>
             <img
-              src={staticUrl("lr_confusion_matrix.png")}
-              alt="Logistic Regression confusion matrix"
+              src={staticUrl("roc_curves.png")}
+              alt="ROC curves"
+              className="dashboard-confusion-img"
+              onLoad={handleImageLoad}
+            />
+          </div>
+        </div>
+
+        {/* Suspicious Keywords + Structural Signals */}
+        <div className="dashboard-confusion-grid stagger">
+          <div className="glass-card dashboard-confusion-card animate-fade-in-up">
+            <div className="dashboard-card-title mono-label">
+              TOP SUSPICIOUS KEYWORDS
+            </div>
+            <img
+              src={staticUrl("suspicious_keywords.png")}
+              alt="Top suspicious keywords"
+              className="dashboard-confusion-img"
+              onLoad={handleImageLoad}
+            />
+          </div>
+
+          <div className="glass-card dashboard-confusion-card animate-fade-in-up">
+            <div className="dashboard-card-title mono-label">
+              STRUCTURAL FEATURE SIGNALS
+            </div>
+            <img
+              src={staticUrl("structural_signals.png")}
+              alt="Structural feature signal strengths"
               className="dashboard-confusion-img"
               onLoad={handleImageLoad}
             />

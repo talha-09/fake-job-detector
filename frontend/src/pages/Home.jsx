@@ -52,11 +52,11 @@ export default function Home() {
           <div className="hero-sidebar hero-anim-card">
             <div className="glass-card hero-highlight-card accent-card">
               <div className="mono-label">PRIMARY CLASSIFIER</div>
-              <div className="giant-metric-title">98.0%</div>
-              <div className="mono-label text-dim">Logistic Regression Accuracy</div>
+              <div className="giant-metric-title">98.6%</div>
+              <div className="mono-label text-dim">XGBoost Accuracy</div>
               <div className="divider-line" />
               <p className="stat-card-text">
-                Trained with Synthetic Minority Oversampling (SMOTE) to prevent native class-imbalance bias.
+                Gradient boosted trees with structural feature analysis and class imbalance handling via scale_pos_weight.
               </p>
             </div>
           </div>
@@ -71,8 +71,8 @@ export default function Home() {
           </div>
           <div className="glass-card home-stat">
             <ShieldCheck size={16} className="home-stat-icon" />
-            <div className="home-stat-value">90.7%</div>
-            <div className="mono-label stat-desc">Naive Bayes Accuracy</div>
+            <div className="home-stat-value">98.6%</div>
+            <div className="mono-label stat-desc">XGBoost Accuracy</div>
           </div>
           <div className="glass-card home-stat">
             <Cpu size={16} className="home-stat-icon" />
@@ -180,8 +180,8 @@ export default function Home() {
             <div>
               <h3>Dual Model Validation</h3>
               <p>
-                We cross-examine data across two models: Logistic Regression (optimized for 
-                precision) and Naive Bayes (optimized for text token probability).
+                We cross-examine data across two models: XGBoost (gradient boosted trees, 
+                optimized for precision) and Logistic Regression (optimized for recall).
               </p>
             </div>
           </div>

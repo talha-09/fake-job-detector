@@ -1,28 +1,40 @@
 """
   Fake Job Posting Detection — Evaluation & Chart Generator
+
+  Generates 7 dark-themed charts comparing XGBoost and Logistic Regression:
+    1. Side-by-side Confusion Matrices
+    2. Precision-Recall Curves
+    3. ROC Curves
+    4. Metrics Bar Chart Comparison
+    5. Top 20 Suspicious Keywords
+    6. Dataset Distribution (donut)
+    7. Structural Feature Signal Strengths
 """
 
 import os
+import re
 import json
 import joblib
 import numpy as np
 import pandas as pd
+import scipy.sparse as sp
 import matplotlib
-matplotlib.use("Agg")   # non-interactive backend (no GUI needed)
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import matplotlib.patches as mpatches
 import seaborn as sns
 from sklearn.metrics import (
     confusion_matrix, ConfusionMatrixDisplay,
-    classification_report
+    roc_curve, auc,
+    precision_recall_curve, average_precision_score,
+    roc_auc_score, classification_report
 )
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
-import re
 import nltk
 from nltk.corpus import stopwords
 
-# Paths 
+# Paths
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "..", "models")
 STATIC_DIR = os.path.join(BASE_DIR, "..", "static")
@@ -30,33 +42,58 @@ DATA_PATH  = os.path.join(BASE_DIR, "data", "fake_job_postings.csv")
 
 os.makedirs(STATIC_DIR, exist_ok=True)
 
-# Style 
-plt.rcParams.update({
-    "figure.facecolor" : "#1e1e2e",
-    "axes.facecolor"   : "#1e1e2e",
-    "axes.edgecolor"   : "#444",
-    "text.color"       : "#cdd6f4",
-    "axes.labelcolor"  : "#cdd6f4",
-    "xtick.color"      : "#cdd6f4",
-    "ytick.color"      : "#cdd6f4",
-    "grid.color"       : "#333",
-    "axes.titlecolor"  : "#cdd6f4",
-    "axes.titlesize"   : 14,
-    "axes.labelsize"   : 11,
-})
-
-INDIGO  = "#6366f1"
-GREEN   = "#10b981"
-RED     = "#ef4444"
-AMBER   = "#f59e0b"
-PURPLE  = "#a855f7"
-CYAN    = "#06b6d4"
-
+# NLTK
 nltk.download("stopwords", quiet=True)
 STOP_WORDS = set(stopwords.words("english"))
 
+# Dark theme palette
+DARK_BG      = "#0D0D0D"
+PANEL_BG     = "#1A1A1A"
+GOLD         = "#F5A623"   # Logistic Regression
+GREEN        = "#4CAF50"   # Real (class 0)
+RED          = "#F44336"   # Fake (class 1)
+TEAL         = "#00BCD4"   # XGBoost
+WHITE        = "#E8E8E8"
+GRID_COLOR   = "#2E2E2E"
+MONO_FONT    = "DejaVu Sans Mono"
 
-# Helper: Rebuild test set (same random_state as training)
+def apply_dark_style():
+    """Apply dark theme globally to all subsequent matplotlib figures."""
+    plt.rcParams.update({
+        "figure.facecolor"       : DARK_BG,
+        "axes.facecolor"         : PANEL_BG,
+        "axes.edgecolor"         : GRID_COLOR,
+        "axes.labelcolor"        : WHITE,
+        "axes.titlecolor"        : WHITE,
+        "axes.grid"              : True,
+        "grid.color"             : GRID_COLOR,
+        "grid.linewidth"         : 0.6,
+        "xtick.color"            : WHITE,
+        "ytick.color"            : WHITE,
+        "xtick.labelsize"        : 9,
+        "ytick.labelsize"        : 9,
+        "text.color"             : WHITE,
+        "font.family"            : "monospace",
+        "font.monospace"         : [MONO_FONT, "Courier New", "monospace"],
+        "legend.facecolor"       : PANEL_BG,
+        "legend.edgecolor"       : GRID_COLOR,
+        "legend.labelcolor"      : WHITE,
+        "figure.titlesize"       : 13,
+        "axes.titlesize"         : 11,
+        "axes.labelsize"         : 10,
+    })
+
+apply_dark_style()
+
+
+# Structural feature columns
+STRUCT_COLS = [
+    "has_salary", "has_logo", "has_questions", "telecommuting",
+    "title_len", "desc_len", "profile_len", "short_desc", "no_profile"
+]
+
+
+# Text cleaning (must be same as in train_model.py)
 def clean_text(text: str) -> str:
     text = str(text).lower()
     text = re.sub(r"<[^>]+>", " ", text)
@@ -73,9 +110,26 @@ def rebuild_test_set():
     df["combined_text"] = df[TEXT_COLS].fillna("").agg(" ".join, axis=1)
     df["cleaned_text"]  = df["combined_text"].apply(clean_text)
 
+    # Build structural features
+    df["has_salary"]    = df["salary_range"].notna().astype(int)
+    df["has_logo"]      = df["has_company_logo"].astype(int)
+    df["has_questions"]  = df["has_questions"].notna().astype(int)
+    df["telecommuting"] = df["telecommuting"].fillna(0).astype(int)
+    df["title_len"]     = df["title"].fillna("").apply(len)
+    df["desc_len"]      = df["description"].fillna("").apply(len)
+    df["profile_len"]   = df["company_profile"].fillna("").apply(len)
+    df["short_desc"]    = (df["desc_len"] < 200).astype(int)
+    df["no_profile"]    = (df["profile_len"] == 0).astype(int)
+
+    # Vectorize text
     tfidf  = joblib.load(os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl"))
-    X      = tfidf.transform(df["cleaned_text"])
-    y      = df["fraudulent"].values
+    X_tfidf = tfidf.transform(df["cleaned_text"])
+
+    # Combine TF-IDF + structural
+    struct_features = df[STRUCT_COLS].values
+    X_struct_sparse = sp.csr_matrix(struct_features)
+    X = sp.hstack([X_tfidf, X_struct_sparse])
+    y = df["fraudulent"].values
 
     _, X_test, _, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
@@ -83,216 +137,345 @@ def rebuild_test_set():
     return X_test, y_test, df
 
 
+# Load models & data
 print("Loading models & rebuilding test set...")
-nb_model = joblib.load(os.path.join(MODELS_DIR, "naive_bayes_model.pkl"))
-lr_model = joblib.load(os.path.join(MODELS_DIR, "logistic_regression_model.pkl"))
-tfidf    = joblib.load(os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl"))
+lr_model  = joblib.load(os.path.join(MODELS_DIR, "logistic_regression_model.pkl"))
+xgb_model = joblib.load(os.path.join(MODELS_DIR, "xgboost_model.pkl"))
+tfidf     = joblib.load(os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl"))
+
+# Load config for thresholds
+with open(os.path.join(MODELS_DIR, "model_config.json")) as f:
+    config = json.load(f)
+
+lr_threshold  = config["lr_threshold"]
+xgb_threshold = config["xgb_threshold"]
 
 X_test, y_test, df = rebuild_test_set()
-nb_pred = nb_model.predict(X_test)
-lr_pred = lr_model.predict(X_test)
+
+# Get probabilities
+lr_probs  = lr_model.predict_proba(X_test)[:, 1]
+xgb_probs = xgb_model.predict_proba(X_test)[:, 1]
+
+# Apply thresholds
+lr_pred  = (lr_probs >= lr_threshold).astype(int)
+xgb_pred = (xgb_probs >= xgb_threshold).astype(int)
+
+# Compute metrics for display
+lr_acc   = float((lr_pred == y_test).mean())
+xgb_acc  = float((xgb_pred == y_test).mean())
+lr_roc   = roc_auc_score(y_test, lr_probs)
+xgb_roc  = roc_auc_score(y_test, xgb_probs)
+lr_pr    = average_precision_score(y_test, lr_probs)
+xgb_pr   = average_precision_score(y_test, xgb_probs)
+
+from sklearn.metrics import precision_score, recall_score, f1_score
+lr_prec_val  = precision_score(y_test, lr_pred, zero_division=0)
+lr_rec_val   = recall_score(y_test, lr_pred, zero_division=0)
+lr_f1_val    = f1_score(y_test, lr_pred, zero_division=0)
+xgb_prec_val = precision_score(y_test, xgb_pred, zero_division=0)
+xgb_rec_val  = recall_score(y_test, xgb_pred, zero_division=0)
+xgb_f1_val   = f1_score(y_test, xgb_pred, zero_division=0)
 
 # Load saved metrics
 with open(os.path.join(STATIC_DIR, "model_metrics.json")) as f:
     metrics = json.load(f)
 
-nb_m = metrics["naive_bayes"]
-lr_m = metrics["logistic_regression"]
-
 print("Models loaded. Generating charts...\n")
 
 
-# CHART 1: Confusion Matrix — Naive Bayes
-print("  [1/6] Confusion Matrix — Naive Bayes")
-fig, ax = plt.subplots(figsize=(6, 5))
-cm = confusion_matrix(y_test, nb_pred)
-disp = ConfusionMatrixDisplay(cm, display_labels=["Real", "Fake"])
-disp.plot(ax=ax, cmap="Blues", colorbar=False)
-ax.set_title("Naive Bayes — Confusion Matrix", pad=14)
-ax.set_xlabel("Predicted Label")
-ax.set_ylabel("True Label")
-# Style the text
-for text in ax.texts:
-    text.set_color("#1e1e2e")
-    text.set_fontsize(14)
-    text.set_fontweight("bold")
+# CHART 1: Side-by-side Confusion Matrices
+print("  [1/7] Confusion Matrices (side-by-side)")
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig.suptitle("Confusion Matrices — Fake Job Detection", fontsize=13, color=WHITE, y=1.02)
+
+for ax, cm_data, title in zip(
+    axes,
+    [confusion_matrix(y_test, lr_pred), confusion_matrix(y_test, xgb_pred)],
+    ["Logistic Regression", "XGBoost"],
+):
+    cm = np.array(cm_data)
+    im = ax.imshow(cm, interpolation="nearest", cmap="YlOrRd", aspect="auto")
+    im.set_clim(0, cm.max())
+
+    labels = [["TN", "FP"], ["FN", "TP"]]
+    cell_colors = [[GREEN, "#B71C1C"], ["#1B5E20", RED]]
+
+    for i in range(2):
+        for j in range(2):
+            count = cm[i, j]
+            pct   = count / cm.sum() * 100
+            ax.text(
+                j, i,
+                f"{labels[i][j]}\n{count:,}\n({pct:.1f}%)",
+                ha="center", va="center",
+                fontsize=10, fontweight="bold",
+                color=cell_colors[i][j],
+                fontfamily="monospace",
+            )
+
+    ax.set_xticks([0, 1])
+    ax.set_yticks([0, 1])
+    ax.set_xticklabels(["Predicted Real", "Predicted Fake"], color=WHITE)
+    ax.set_yticklabels(["Actual Real", "Actual Fake"], color=WHITE)
+    ax.set_title(title, color=WHITE, pad=10)
+    ax.set_facecolor(PANEL_BG)
+    for spine in ax.spines.values():
+        spine.set_edgecolor(GRID_COLOR)
+
 plt.tight_layout()
-plt.savefig(os.path.join(STATIC_DIR, "nb_confusion_matrix.png"), dpi=150, bbox_inches="tight")
+cm_path = os.path.join(STATIC_DIR, "confusion_matrices.png")
+plt.savefig(cm_path, dpi=150, bbox_inches="tight", facecolor=DARK_BG)
 plt.close()
+print(f"    Saved: {cm_path}")
 
 
-# CHART 2: Confusion Matrix — Logistic Regression
-print("  [2/6] Confusion Matrix — Logistic Regression")
-fig, ax = plt.subplots(figsize=(6, 5))
-cm2 = confusion_matrix(y_test, lr_pred)
-disp2 = ConfusionMatrixDisplay(cm2, display_labels=["Real", "Fake"])
-disp2.plot(ax=ax, cmap="Greens", colorbar=False)
-ax.set_title("Logistic Regression — Confusion Matrix", pad=14)
-ax.set_xlabel("Predicted Label")
-ax.set_ylabel("True Label")
-for text in ax.texts:
-    text.set_color("#1e1e2e")
-    text.set_fontsize(14)
-    text.set_fontweight("bold")
-plt.tight_layout()
-plt.savefig(os.path.join(STATIC_DIR, "lr_confusion_matrix.png"), dpi=150, bbox_inches="tight")
-plt.close()
+# CHART 2: Precision-Recall Curves
+print("  [2/7] Precision-Recall Curves")
+fig, ax = plt.subplots(figsize=(8, 6))
+fig.suptitle("Precision-Recall Curves", fontsize=13, color=WHITE)
 
+for probs, label, color, threshold in [
+    (lr_probs,  f"Logistic Regression (PR-AUC = {lr_pr:.3f})",  GOLD, lr_threshold),
+    (xgb_probs, f"XGBoost             (PR-AUC = {xgb_pr:.3f})", TEAL, xgb_threshold),
+]:
+    precision_c, recall_c, thresholds_c = precision_recall_curve(y_test, probs)
+    ax.plot(recall_c, precision_c, color=color, lw=2, label=label)
 
-# CHART 3: Model Accuracy Comparison Bar Chart
-print("  [3/6] Accuracy Comparison Chart")
-fig, ax = plt.subplots(figsize=(7, 5))
-
-models     = ["Naive Bayes", "Logistic\nRegression"]
-accuracies = [nb_m["accuracy"] * 100, lr_m["accuracy"] * 100]
-colors     = [INDIGO, GREEN]
-
-bars = ax.bar(models, accuracies, color=colors, width=0.45, zorder=3, edgecolor="none")
-ax.set_ylim(80, 100)
-ax.set_ylabel("Accuracy (%)")
-ax.set_title("Model Accuracy Comparison", pad=14)
-ax.yaxis.grid(True, zorder=0)
-ax.set_axisbelow(True)
-
-for bar, acc in zip(bars, accuracies):
-    ax.text(
-        bar.get_x() + bar.get_width() / 2,
-        bar.get_height() + 0.3,
-        f"{acc:.1f}%",
-        ha="center", va="bottom",
-        fontsize=13, fontweight="bold", color="white"
+    idx = np.argmin(np.abs(thresholds_c - threshold))
+    ax.scatter(
+        recall_c[idx], precision_c[idx],
+        color=color, s=100, zorder=5,
+        edgecolors=WHITE, linewidths=0.8,
+        label=f"  threshold = {threshold:.3f}",
     )
 
+baseline = (y_test == 1).mean()
+ax.axhline(baseline, color=RED, linestyle="--", lw=1.2,
+           label=f"Random baseline ({baseline:.3f})")
+
+ax.set_xlabel("Recall", color=WHITE)
+ax.set_ylabel("Precision", color=WHITE)
+ax.set_xlim([0, 1])
+ax.set_ylim([0, 1.05])
+ax.legend(loc="upper right", fontsize=8)
+ax.set_facecolor(PANEL_BG)
+for spine in ax.spines.values():
+    spine.set_edgecolor(GRID_COLOR)
+
 plt.tight_layout()
-plt.savefig(os.path.join(STATIC_DIR, "accuracy_comparison.png"), dpi=150, bbox_inches="tight")
+pr_path = os.path.join(STATIC_DIR, "pr_curves.png")
+plt.savefig(pr_path, dpi=150, bbox_inches="tight", facecolor=DARK_BG)
 plt.close()
+print(f"    Saved: {pr_path}")
 
 
-# CHART 4: Metrics Comparison (Precision, Recall, F1, Accuracy)
-print("  [4/6] Metrics Comparison Chart")
-fig, ax = plt.subplots(figsize=(9, 5))
+# CHART 3: ROC Curves
+print("  [3/7] ROC Curves")
+fig, ax = plt.subplots(figsize=(7, 6))
+fig.suptitle("ROC Curves", fontsize=13, color=WHITE)
 
-metric_names = ["Accuracy", "Precision", "Recall", "F1 Score"]
-nb_vals = [nb_m["accuracy"], nb_m["precision"], nb_m["recall"], nb_m["f1_score"]]
-lr_vals = [lr_m["accuracy"], lr_m["precision"], lr_m["recall"], lr_m["f1_score"]]
+for probs, label, color in [
+    (lr_probs,  f"Logistic Regression (AUC = {lr_roc:.3f})",  GOLD),
+    (xgb_probs, f"XGBoost             (AUC = {xgb_roc:.3f})", TEAL),
+]:
+    fpr, tpr, _ = roc_curve(y_test, probs)
+    ax.plot(fpr, tpr, color=color, lw=2, label=label)
 
-x      = np.arange(len(metric_names))
+ax.plot([0, 1], [0, 1], color=RED, linestyle="--", lw=1.2, label="Random (AUC = 0.500)")
+ax.set_xlabel("False Positive Rate", color=WHITE)
+ax.set_ylabel("True Positive Rate", color=WHITE)
+ax.set_xlim([0, 1])
+ax.set_ylim([0, 1.02])
+ax.legend(loc="lower right", fontsize=9)
+ax.set_facecolor(PANEL_BG)
+for spine in ax.spines.values():
+    spine.set_edgecolor(GRID_COLOR)
+
+plt.tight_layout()
+roc_path = os.path.join(STATIC_DIR, "roc_curves.png")
+plt.savefig(roc_path, dpi=150, bbox_inches="tight", facecolor=DARK_BG)
+plt.close()
+print(f"    Saved: {roc_path}")
+
+
+# CHART 4: Metrics Bar Chart — side-by-side comparison
+print("  [4/7] Metrics Comparison Bar Chart")
+metric_labels = ["Accuracy", "Precision", "Recall", "F1 Score", "ROC-AUC", "PR-AUC"]
+lr_vals  = [lr_acc,      lr_prec_val,  lr_rec_val,  lr_f1_val,  lr_roc,  lr_pr]
+xgb_vals = [xgb_acc,     xgb_prec_val, xgb_rec_val, xgb_f1_val, xgb_roc, xgb_pr]
+
+x      = np.arange(len(metric_labels))
 width  = 0.35
 
-b1 = ax.bar(x - width/2, [v*100 for v in nb_vals], width, label="Naive Bayes",          color=INDIGO, zorder=3)
-b2 = ax.bar(x + width/2, [v*100 for v in lr_vals], width, label="Logistic Regression",   color=GREEN,  zorder=3)
+fig, ax = plt.subplots(figsize=(11, 5))
+fig.suptitle("Model Performance Comparison", fontsize=13, color=WHITE)
 
-ax.set_ylabel("Score (%)")
-ax.set_title("Model Performance Metrics", pad=14)
+bars_lr  = ax.bar(x - width/2, lr_vals,  width, label="Logistic Regression", color=GOLD,  alpha=0.88)
+bars_xgb = ax.bar(x + width/2, xgb_vals, width, label="XGBoost",             color=TEAL,  alpha=0.88)
+
+for bar in bars_lr:
+    h = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width()/2, h + 0.008,
+            f"{h:.3f}", ha="center", va="bottom", fontsize=8,
+            color=GOLD, fontfamily="monospace")
+
+for bar in bars_xgb:
+    h = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width()/2, h + 0.008,
+            f"{h:.3f}", ha="center", va="bottom", fontsize=8,
+            color=TEAL, fontfamily="monospace")
+
 ax.set_xticks(x)
-ax.set_xticklabels(metric_names)
-ax.set_ylim(0, 110)
-ax.yaxis.grid(True, zorder=0)
-ax.set_axisbelow(True)
-ax.legend(facecolor="#2a2a3e", edgecolor="#444")
-
-for bar in list(b1) + list(b2):
-    ax.text(
-        bar.get_x() + bar.get_width() / 2,
-        bar.get_height() + 1,
-        f"{bar.get_height():.1f}",
-        ha="center", va="bottom", fontsize=9, color="white"
-    )
+ax.set_xticklabels(metric_labels, color=WHITE)
+ax.set_ylim([0, 1.13])
+ax.set_ylabel("Score", color=WHITE)
+ax.legend(fontsize=9)
+ax.set_facecolor(PANEL_BG)
+for spine in ax.spines.values():
+    spine.set_edgecolor(GRID_COLOR)
 
 plt.tight_layout()
-plt.savefig(os.path.join(STATIC_DIR, "metrics_comparison.png"), dpi=150, bbox_inches="tight")
+bar_path = os.path.join(STATIC_DIR, "metrics_comparison.png")
+plt.savefig(bar_path, dpi=150, bbox_inches="tight", facecolor=DARK_BG)
 plt.close()
+print(f"    Saved: {bar_path}")
 
 
-# CHART 5: Class Distribution (Real vs Fake)
-print("  [5/6] Class Distribution Chart")
-fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# CHART 5: Top 20 Suspicious Keywords (from LR coefficients)
+print("  [5/7] Suspicious Keywords")
+
+with open(os.path.join(STATIC_DIR, "suspicious_keywords.json"), "r") as f:
+    kw_data = json.load(f)
+
+kw_scores = kw_data["keywords_with_scores"][:20]
+words     = [item["word"]  for item in reversed(kw_scores)]
+scores    = [item["score"] for item in reversed(kw_scores)]
+
+fig, ax = plt.subplots(figsize=(9, 7))
+fig.suptitle("Top 20 Suspicious Keywords\n(Logistic Regression Coefficients → Fake)", fontsize=11, color=WHITE)
+
+colors = [RED if s > 0.5 else GOLD for s in scores]
+bars   = ax.barh(words, scores, color=colors, alpha=0.85, height=0.65)
+
+for bar, score in zip(bars, scores):
+    ax.text(
+        bar.get_width() + 0.01, bar.get_y() + bar.get_height()/2,
+        f"{score:.3f}", va="center", ha="left",
+        fontsize=8, color=WHITE, fontfamily="monospace",
+    )
+
+ax.set_xlabel("Coefficient (higher → stronger fake signal)", color=WHITE)
+ax.set_facecolor(PANEL_BG)
+ax.set_xlim([0, max(scores) * 1.18])
+for spine in ax.spines.values():
+    spine.set_edgecolor(GRID_COLOR)
+
+plt.tight_layout()
+kw_path = os.path.join(STATIC_DIR, "suspicious_keywords.png")
+plt.savefig(kw_path, dpi=150, bbox_inches="tight", facecolor=DARK_BG)
+plt.close()
+print(f"    Saved: {kw_path}")
+
+
+# CHART 6: Dataset Distribution (donut chart)
+print("  [6/7] Dataset Distribution")
 
 real_count = int((df["fraudulent"] == 0).sum())
 fake_count = int((df["fraudulent"] == 1).sum())
 
-# Pie chart
-axes[0].pie(
+fig, ax = plt.subplots(figsize=(6, 6))
+fig.suptitle("Dataset Class Distribution", fontsize=13, color=WHITE)
+
+wedges, texts, autotexts = ax.pie(
     [real_count, fake_count],
-    labels=["Real", "Fake"],
+    labels=["Real Jobs", "Fake Jobs"],
     colors=[GREEN, RED],
     autopct="%1.1f%%",
     startangle=90,
-    textprops={"color": "white", "fontsize": 12},
-    wedgeprops={"edgecolor": "#1e1e2e", "linewidth": 2}
+    wedgeprops={"width": 0.5, "edgecolor": DARK_BG, "linewidth": 2},
+    pctdistance=0.75,
 )
-axes[0].set_title("Class Distribution", pad=14)
+for t in texts:
+    t.set_color(WHITE)
+    t.set_fontfamily("monospace")
+    t.set_fontsize(10)
+for at in autotexts:
+    at.set_color(DARK_BG)
+    at.set_fontfamily("monospace")
+    at.set_fontweight("bold")
+    at.set_fontsize(9)
 
-# Bar chart
-axes[1].bar(["Real", "Fake"], [real_count, fake_count], color=[GREEN, RED], zorder=3)
-axes[1].set_ylabel("Count")
-axes[1].set_title("Real vs Fake Job Postings", pad=14)
-axes[1].yaxis.grid(True, zorder=0)
-axes[1].set_axisbelow(True)
-for i, v in enumerate([real_count, fake_count]):
-    axes[1].text(i, v + 100, f"{v:,}", ha="center", fontsize=12, color="white", fontweight="bold")
+ax.text(0, 0, f"{df.shape[0]:,}\nTotal", ha="center", va="center",
+        fontsize=11, color=WHITE, fontfamily="monospace", fontweight="bold")
 
-plt.tight_layout()
-plt.savefig(os.path.join(STATIC_DIR, "class_distribution.png"), dpi=150, bbox_inches="tight")
-plt.close()
-
-
-# CHART 6: Top 20 Suspicious Keywords
-print("  [6/6] Suspicious Keywords Chart")
-
-with open(os.path.join(STATIC_DIR, "suspicious_keywords.json")) as f:
-    kw_data = json.load(f)
-
-top_keywords = kw_data["keywords"][:20]
-feature_names = np.array(tfidf.get_feature_names_out())
-fake_log_prob = nb_model.feature_log_prob_[1]
-real_log_prob = nb_model.feature_log_prob_[0]
-diff = fake_log_prob - real_log_prob
-
-# Get scores for the top keywords
-kw_indices = [np.where(feature_names == kw)[0][0] for kw in top_keywords if kw in feature_names]
-kw_scores  = diff[kw_indices]
-kw_words   = feature_names[kw_indices]
-
-# Sort by score
-sorted_idx   = kw_scores.argsort()
-kw_words     = kw_words[sorted_idx]
-kw_scores    = kw_scores[sorted_idx]
-
-fig, ax = plt.subplots(figsize=(8, 7))
-colors_bar = [RED if s > 0 else GREEN for s in kw_scores]
-bars = ax.barh(kw_words, kw_scores, color=colors_bar, zorder=3)
-ax.set_xlabel("Log-Probability Difference (Fake - Real)")
-ax.set_title("Top Suspicious Keywords\n(Higher = More Indicative of Fake Posting)", pad=14)
-ax.xaxis.grid(True, zorder=0)
-ax.set_axisbelow(True)
-
-red_patch   = mpatches.Patch(color=RED,   label="Spam Indicator")
-green_patch = mpatches.Patch(color=GREEN, label="Legit Indicator")
-ax.legend(handles=[red_patch, green_patch], facecolor="#2a2a3e", edgecolor="#444")
+ax.set_facecolor(DARK_BG)
+fig.set_facecolor(DARK_BG)
 
 plt.tight_layout()
-plt.savefig(os.path.join(STATIC_DIR, "suspicious_keywords.png"), dpi=150, bbox_inches="tight")
+dist_path = os.path.join(STATIC_DIR, "dataset_distribution.png")
+plt.savefig(dist_path, dpi=150, bbox_inches="tight", facecolor=DARK_BG)
 plt.close()
+print(f"    Saved: {dist_path}")
 
 
+# CHART 7: Structural Feature Signal Strengths
+print("  [7/7] Structural Feature Signals")
 
+struct_signals = kw_data.get("structural_signals", [])
+
+if struct_signals:
+    s_words  = [item["feature"] for item in reversed(struct_signals)]
+    s_scores = [item["score"]   for item in reversed(struct_signals)]
+
+    fig, ax = plt.subplots(figsize=(8, max(4, len(s_words) * 0.55)))
+    fig.suptitle("Structural Feature Signal Strengths\n(Logistic Regression Coefficients)", fontsize=11, color=WHITE)
+
+    s_colors = [RED if s > 0 else GREEN for s in s_scores]
+    s_bars   = ax.barh(s_words, s_scores, color=s_colors, alpha=0.85, height=0.6)
+
+    ax.axvline(0, color=WHITE, linewidth=0.8, linestyle="--")
+
+    for bar, score in zip(s_bars, s_scores):
+        offset = 0.005 if score >= 0 else -0.005
+        ha     = "left" if score >= 0 else "right"
+        ax.text(
+            bar.get_width() + offset, bar.get_y() + bar.get_height()/2,
+            f"{score:+.3f}", va="center", ha=ha,
+            fontsize=8, color=WHITE, fontfamily="monospace",
+        )
+
+    ax.set_xlabel("Coefficient  (positive → fake signal,  negative → real signal)", color=WHITE)
+    ax.set_facecolor(PANEL_BG)
+    for spine in ax.spines.values():
+        spine.set_edgecolor(GRID_COLOR)
+
+    plt.tight_layout()
+    struct_path = os.path.join(STATIC_DIR, "structural_signals.png")
+    plt.savefig(struct_path, dpi=150, bbox_inches="tight", facecolor=DARK_BG)
+    plt.close()
+    print(f"    Saved: {struct_path}")
+else:
+    print("    No structural signals found — skipping Chart 7.")
+
+
+# SUMMARY
 print()
 print("=" * 60)
 print("EVALUATION COMPLETE — All charts saved!")
 print("=" * 60)
-print("\n  Charts saved to backend/static/:")
 charts = [
-    "nb_confusion_matrix.png",
-    "lr_confusion_matrix.png",
-    "accuracy_comparison.png",
+    "confusion_matrices.png",
+    "pr_curves.png",
+    "roc_curves.png",
     "metrics_comparison.png",
-    "class_distribution.png",
     "suspicious_keywords.png",
+    "dataset_distribution.png",
+    "structural_signals.png",
 ]
+print("\n  Charts saved to backend/static/:")
 for c in charts:
     path = os.path.join(STATIC_DIR, c)
     exists = "YES" if os.path.exists(path) else "NO"
     print(f"    {exists} {c}")
 
-print("\n  ➡  Phase 1 COMPLETE — Ready for Phase 2 (FastAPI backend)!")
+print("\n  =>  Evaluation COMPLETE — Charts ready for frontend!")

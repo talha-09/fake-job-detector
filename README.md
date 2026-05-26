@@ -33,10 +33,10 @@ Job seekers and recruiters increasingly encounter fraudulent job advertisements 
 
 - **Input:** Raw job posting text (title, description, requirements, or full combined copy).
 - **Processing:** Text normalization, stopword removal, and TF-IDF vectorization using the same preprocessing logic at training and inference time.
-- **Inference:** One of two scikit-learn classifiers (Multinomial Naive Bayes or Logistic Regression) returns a label, confidence score, risk tier, matched suspicious keywords, and a human-readable explanation.
+- **Inference:** One of two classifiers (XGBoost or Logistic Regression) returns a label, confidence score, risk tier, matched suspicious keywords, and a human-readable explanation.
 - **Persistence:** Each prediction is stored in a local SQLite database for history and aggregate statistics.
 
-The default production-facing classifier is **Logistic Regression**, which achieves higher precision on the held-out test set. **Naive Bayes** remains available for comparison and for lexical-probability-style explanations via its feature log-odds.
+The default production-facing classifier is **XGBoost**, which achieves the highest precision and F1 score on the held-out test set. **Logistic Regression** remains available as a higher-recall alternative.
 
 ---
 
@@ -45,7 +45,7 @@ The default production-facing classifier is **Logistic Regression**, which achie
 
 | Capability               | Description                                                                   |
 | ------------------------ | ----------------------------------------------------------------------------- |
-| Dual-model inference     | Switch between Naive Bayes and Logistic Regression at request time            |
+| Dual-model inference     | Switch between XGBoost and Logistic Regression at request time                |
 | Explainable output       | Risk level, suspicious keyword hits, and narrative explanation per prediction |
 | Class imbalance handling | SMOTE applied on the training split before model fitting                      |
 | Model benchmarks         | Accuracy, precision, recall, F1, and confusion matrices exposed via REST      |
@@ -77,9 +77,10 @@ flowchart TB
 
     subgraph ML["Inference Artefacts"]
         TFIDF[tfidf_vectorizer.pkl]
-        NB[naive_bayes_model.pkl]
+        XGB[xgboost_model.pkl]
         LR[logistic_regression_model.pkl]
         KW[suspicious_keywords.json]
+        CFG[model_config.json]
     end
 
     subgraph Store["Persistence"]
@@ -92,9 +93,10 @@ flowchart TB
     Dashboard --> Static
     History --> Hist
   Predict --> TFIDF
-    Predict --> NB
+    Predict --> XGB
     Predict --> LR
     Predict --> KW
+    Predict --> CFG
     Predict --> SQLite
     Metrics --> MetricsJSON
 ```
@@ -118,13 +120,13 @@ Models are loaded once at application startup (module import time in `predict.py
 ### Backend
 
 
-| Component     | Version / Library                                                   |
-| ------------- | ------------------------------------------------------------------- |
-| Runtime       | Python 3.10+ recommended                                            |
-| Web framework | FastAPI, Uvicorn                                                    |
-| ML            | scikit-learn, imbalanced-learn (SMOTE), NLTK, joblib, NumPy, pandas |
-| Persistence   | SQLite3 (stdlib)                                                    |
-| Validation    | Pydantic v2 (via FastAPI)                                           |
+| Component     | Version / Library                                                                   |
+| ------------- | ----------------------------------------------------------------------------------- |
+| Runtime       | Python 3.10+ recommended                                                            |
+| Web framework | FastAPI, Uvicorn                                                                    |
+| ML            | scikit-learn, XGBoost, imbalanced-learn (SMOTE), NLTK, joblib, NumPy, pandas, SciPy |
+| Persistence   | SQLite3 (stdlib)                                                                    |
+| Validation    | Pydantic v2 (via FastAPI)                                                           |
 
 
 ### Frontend
@@ -245,9 +247,10 @@ Training is performed offline and is not triggered by the web server.
 
 | Output                    | Path                                           |
 | ------------------------- | ---------------------------------------------- |
-| Naive Bayes model         | `backend/models/naive_bayes_model.pkl`         |
+| XGBoost model             | `backend/models/xgboost_model.pkl`             |
 | Logistic Regression model | `backend/models/logistic_regression_model.pkl` |
 | TF-IDF vectorizer         | `backend/models/tfidf_vectorizer.pkl`          |
+| Model config              | `backend/models/model_config.json`             |
 | Metrics JSON              | `backend/static/model_metrics.json`            |
 | Suspicious keywords       | `backend/static/suspicious_keywords.json`      |
 
@@ -265,7 +268,7 @@ Start the backend and frontend in separate terminals.
 ```bash
 cd backend
 .\venv\Scripts\activate          # Windows
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload    # by default it uses port 8000, you can change it using port flag
 ```
 
 - API root: `http://localhost:8000`
@@ -309,15 +312,15 @@ Classifies a job posting and persists the result.
 ```json
 {
   "job_text": "Full text of the job posting to analyze...",
-  "model_name": "logistic_regression"
+  "model_name": "xgboost"
 }
 ```
 
 
-| Field        | Type   | Required | Constraints                                                             |
-| ------------ | ------ | -------- | ----------------------------------------------------------------------- |
-| `job_text`   | string | Yes      | 20–10,000 characters                                                    |
-| `model_name` | string | No       | `naive_bayes` or `logistic_regression` (default: `logistic_regression`) |
+| Field        | Type   | Required | Constraints                                             |
+| ------------ | ------ | -------- | ------------------------------------------------------- |
+| `job_text`   | string | Yes      | 20–10,000 characters                                    |
+| `model_name` | string | No       | `xgboost` or `logistic_regression` (default: `xgboost`) |
 
 
 **Response body**
@@ -389,19 +392,6 @@ Allowed origins are defined in `backend/app/main.py`:
 
 - `http://localhost:5173` (Vite dev server)
 - `http://localhost:3000` (fallback)
-- `https://fake-job-detector.vercel.app` (production frontend placeholder)
-
-Add or update origins when deploying to new hosts.
-
-### Frontend API base URL
-
-Create `frontend/.env` for production builds:
-
-```env
-VITE_API_URL=https://your-backend-host.example.com
-```
-
-If unset, the client defaults to `http://localhost:8000`.
 
 ### Database location
 
@@ -422,14 +412,6 @@ SQLite database file: `backend/email_detector.db` (created automatically on firs
 
 The HTTP layer is centralized in `frontend/src/services/api.js`, which wraps Axios with a 15-second timeout and consistent `/api` prefix handling.
 
-**Production build**
-
-```bash
-cd frontend
-npm run build
-npm run preview   # optional local preview of production bundle
-```
-
 ---
 
 ## Machine Learning Pipeline
@@ -445,13 +427,16 @@ npm run preview   # optional local preview of production bundle
   - `sublinear_tf=True`
   - `min_df=2`
 5. **Split** 80/20 stratified train/test (`random_state=42`).
-6. **Balance** training features with SMOTE (`random_state=42`).
-7. **Train** Multinomial Naive Bayes (`alpha=0.5`) and Logistic Regression (`max_iter=1000`, `C=1.0`, `solver=lbfgs`).
-8. **Evaluate** on the untouched test set; serialize models, metrics, and top discriminative keywords.
+6. **Balance** training features with SMOTE (`random_state=42`) for Logistic Regression.
+7. **Build** 9 structural features: `has_salary`, `has_logo`, `has_questions`, `telecommuting`, `title_len`, `desc_len`, `profile_len`, `short_desc`, `no_profile`.
+8. **Combine** TF-IDF and structural features into a 5,009-dimensional sparse matrix.
+9. **Train** XGBoost (`scale_pos_weight` for class imbalance, `n_estimators=300`, `max_depth=6`) and Logistic Regression (`max_iter=1000`, `C=1.0`, `solver=lbfgs`, SMOTE-balanced).
+10. **Tune** classification thresholds via precision-recall curves for optimal F1.
+11. **Evaluate** on the untouched test set; serialize models, config, metrics, and top discriminative keywords.
 
 ### Explainability
 
-- **Suspicious keywords:** The fifty TF-IDF features with the largest Naive Bayes log-probability gap between Fake and Real classes are stored in `suspicious_keywords.json`. At inference time, any keyword appearing in the cleaned posting is surfaced in the API response (up to five matches).
+- **Suspicious keywords:** The fifty TF-IDF features with the largest Logistic Regression coefficients toward the Fake class are stored in `suspicious_keywords.json`. Structural feature signals are also extracted. At inference time, any keyword appearing in the cleaned posting is surfaced in the API response (up to five matches).
 - **Narrative explanation:** A template string summarizes confidence, risk, and matched terms without exposing raw model coefficients to the client.
 
 Inference preprocessing in `predict.py` must remain identical to `train_model.py`; any divergence will degrade accuracy.
@@ -473,31 +458,59 @@ Metrics below are from the committed `model_metrics.json` (held-out 20% test spl
 | Fraud rate          | 4.84%  |
 
 
-### Naive Bayes
+### XGBoost (recommended default)
 
 
 | Metric    | Value  |
 | --------- | ------ |
-| Accuracy  | 92.31% |
-| Precision | 37.86% |
-| Recall    | 91.91% |
-| F1 score  | 53.63% |
+| Accuracy  | 98.63% |
+| Precision | 91.33% |
+| Recall    | 79.19% |
+| F1 score  | 84.83% |
+| ROC-AUC   | 0.9874 |
+| PR-AUC    | 0.9110 |
 
 
-High recall with lower precision is typical when the model aggressively flags minority-class patterns.
+Highest precision model — when it says "Fake", it's almost always correct.
 
-### Logistic Regression (recommended default)
+### Logistic Regression (higher recall alternative)
 
 
 | Metric    | Value  |
 | --------- | ------ |
-| Accuracy  | 98.04% |
-| Precision | 75.37% |
+| Accuracy  | 98.01% |
+| Precision | 75.00% |
 | Recall    | 88.44% |
-| F1 score  | 81.38% |
+| F1 score  | 81.17% |
 
 
-For operational use cases where false positives carry a high cost (e.g., auto-rejecting legitimate employers), prefer Logistic Regression and treat outputs as advisory rather than authoritative.
+Higher recall catches more fakes at the cost of more false positives. Trained with SMOTE on the same combined feature set.
+
+For operational use cases where false positives carry a high cost (e.g., auto-rejecting legitimate employers), prefer XGBoost and treat outputs as advisory rather than authoritative.
+
+---
+
+## Visualizations
+
+The training pipeline generates evaluation charts to help analyze model performance.
+
+**Confusion Matrices (XGBoost vs Logistic Regression)**  
+Confusion Matrices
+
+**Model Metrics Comparison**  
+Metrics Comparison
+
+**Precision-Recall Curves**  
+PR Curves
+
+**Top Suspicious Keywords (TF-IDF)**  
+Suspicious Keywords
+
+**Structural Feature Signals**  
+Structural Signals
+
+**Dataset Distribution**  
+Dataset Distribution
 
 ---
 
@@ -540,6 +553,6 @@ Use predictions to prioritize review, not to make irreversible employment or leg
 ## Acknowledgments
 
 - Dataset: Shivam Bansal, *Real or Fake: Fake JobPosting Prediction* (Kaggle)
-- Built with FastAPI, scikit-learn, React, and Vite
+- Built with FastAPI, scikit-learn, XGBoost, React, and Vite
 
 For questions, issues, or contributions, open an issue or pull request in the project repository.

@@ -1,54 +1,157 @@
 {
   "keywords": [
-    "petroleum",
+    "link",
+    "earn",
+    "aptitude",
+    "encouraged",
     "oil gas",
     "data entry",
-    "typing",
-    "clerical",
-    "administrative assistant",
-    "work home",
-    "clerk",
-    "earn",
-    "training provided",
-    "design technology",
-    "gas industry",
-    "per day",
-    "encouraged",
-    "facilitating",
-    "solutions global",
     "signing",
-    "hired",
-    "wellness",
-    "tax free",
-    "discounts",
-    "negotiations",
-    "receptionist",
-    "duration",
-    "minutes",
+    "high school",
+    "money",
+    "phone",
+    "staffing",
     "oil",
-    "zero",
-    "town",
-    "entry",
-    "service representative",
-    "aptitude",
-    "job done",
-    "maximizing",
-    "cash",
-    "fee",
-    "ranging",
-    "gas",
+    "perks",
+    "hired",
+    "leveraging",
     "referral",
-    "get job",
-    "time full",
-    "newly",
-    "partnered",
-    "competitive benefits",
-    "able multi",
-    "amp experience",
-    "started",
-    "agreements",
-    "beverage",
-    "recovery",
-    "directions"
-  ]
+    "industry",
+    "url",
+    "engineering",
+    "administrative",
+    "per",
+    "hotel",
+    "gas industry",
+    "gas",
+    "compensation package",
+    "internet",
+    "email",
+    "petroleum",
+    "cash",
+    "size"
+  ],
+  "keywords_with_scores": [
+    {
+      "word": "link",
+      "score": 4.9235
+    },
+    {
+      "word": "earn",
+      "score": 4.3239
+    },
+    {
+      "word": "aptitude",
+      "score": 4.1369
+    },
+    {
+      "word": "encouraged",
+      "score": 4.0891
+    },
+    {
+      "word": "oil gas",
+      "score": 3.8645
+    },
+    {
+      "word": "data entry",
+      "score": 3.7792
+    },
+    {
+      "word": "signing",
+      "score": 3.7331
+    },
+    {
+      "word": "high school",
+      "score": 3.7231
+    },
+    {
+      "word": "money",
+      "score": 3.6411
+    },
+    {
+      "word": "phone",
+      "score": 3.4391
+    },
+    {
+      "word": "staffing",
+      "score": 3.4293
+    },
+    {
+      "word": "oil",
+      "score": 3.4174
+    },
+    {
+      "word": "perks",
+      "score": 3.3048
+    },
+    {
+      "word": "hired",
+      "score": 3.2734
+    },
+    {
+      "word": "leveraging",
+      "score": 3.2033
+    },
+    {
+      "word": "referral",
+      "score": 3.1862
+    },
+    {
+      "word": "industry",
+      "score": 3.1213
+    },
+    {
+      "word": "url",
+      "score": 3.0992
+    },
+    {
+      "word": "engineering",
+      "score": 3.0738
+    },
+    {
+      "word": "administrative",
+      "score": 3.0086
+    },
+    {
+      "word": "per",
+      "score": 3.0015
+    },
+    {
+      "word": "hotel",
+      "score": 2.9744
+    },
+    {
+      "word": "gas industry",
+      "score": 2.9411
+    },
+    {
+      "word": "gas",
+      "score": 2.898
+    },
+    {
+      "word": "compensation package",
+      "score": 2.8889
+    },
+    {
+      "word": "internet",
+      "score": 2.7901
+    },
+    {
+      "word": "email",
+      "score": 2.7889
+    },
+    {
+      "word": "petroleum",
+      "score": 2.7859
+    },
+    {
+      "word": "cash",
+      "score": 2.7654
+    },
+    {
+      "word": "size",
+      "score": 2.7385
+    }
+  ],
+  "structural_signals": []
 }

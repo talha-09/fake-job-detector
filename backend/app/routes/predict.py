@@ -2,7 +2,11 @@
 predict.py — POST /api/predict
 
 Loads the trained .pkl models ONCE at module import time.
-Every user request just calls model.predict() — no retraining ever happens.
+Every user request just calls model.predict_proba() — no retraining ever happens.
+
+Models:
+  - XGBoost (primary)           — gradient boosted trees, highest precision
+  - Logistic Regression (secondary) — SMOTE-trained, higher recall
 """
 
 import os
@@ -10,6 +14,7 @@ import re
 import json
 import joblib
 import numpy as np
+import scipy.sparse as sp
 from fastapi import APIRouter, HTTPException
 
 from app.schemas   import PredictRequest, PredictResponse
@@ -17,34 +22,49 @@ from app.database  import save_prediction
 
 router = APIRouter()
 
-#  Resolve paths relative to THIS file 
+# Resolve paths relative to THIS file
 _HERE       = os.path.dirname(os.path.abspath(__file__))
 _MODELS_DIR = os.path.normpath(os.path.join(_HERE, "..", "..", "models"))
 _STATIC_DIR = os.path.normpath(os.path.join(_HERE, "..", "..", "static"))
 
-#  Load artefacts at startup (ONCE) 
+# Load artefacts at startup (ONCE)
 _MODELS: dict = {}
 _TFIDF        = None
 _KEYWORDS: list = []
+_CONFIG: dict = {}
+
+# Structural feature column names (must match training)
+_STRUCT_COLS = [
+    "has_salary", "has_logo", "has_questions", "telecommuting",
+    "title_len", "desc_len", "profile_len", "short_desc", "no_profile"
+]
 
 def _load_artefacts():
-    global _TFIDF, _KEYWORDS
+    global _TFIDF, _KEYWORDS, _CONFIG
 
-    nb_path  = os.path.join(_MODELS_DIR, "naive_bayes_model.pkl")
-    lr_path  = os.path.join(_MODELS_DIR, "logistic_regression_model.pkl")
+    xgb_path   = os.path.join(_MODELS_DIR, "xgboost_model.pkl")
+    lr_path    = os.path.join(_MODELS_DIR, "logistic_regression_model.pkl")
     tfidf_path = os.path.join(_MODELS_DIR, "tfidf_vectorizer.pkl")
-    kw_path  = os.path.join(_STATIC_DIR,  "suspicious_keywords.json")
+    config_path = os.path.join(_MODELS_DIR, "model_config.json")
+    kw_path    = os.path.join(_STATIC_DIR,  "suspicious_keywords.json")
 
-    missing = [p for p in [nb_path, lr_path, tfidf_path] if not os.path.exists(p)]
+    missing = [p for p in [xgb_path, lr_path, tfidf_path] if not os.path.exists(p)]
     if missing:
         raise RuntimeError(
             f"[predict] Missing model files: {missing}\n"
             "Please copy the .pkl files from Colab into backend/models/ first."
         )
 
-    _MODELS["naive_bayes"]          = joblib.load(nb_path)
+    _MODELS["xgboost"]              = joblib.load(xgb_path)
     _MODELS["logistic_regression"]  = joblib.load(lr_path)
     _TFIDF                          = joblib.load(tfidf_path)
+
+    # Load model config (thresholds, structural column names)
+    if os.path.exists(config_path):
+        with open(config_path) as f:
+            _CONFIG.update(json.load(f))
+        print(f"[predict] Config loaded — XGB threshold: {_CONFIG.get('xgb_threshold')}, "
+              f"LR threshold: {_CONFIG.get('lr_threshold')}")
 
     if os.path.exists(kw_path):
         with open(kw_path) as f:
@@ -72,6 +92,31 @@ def _clean_text(text: str) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     tokens = [w for w in text.split() if w not in _STOP_WORDS and len(w) > 2]
     return " ".join(tokens)
+
+
+def _build_structural_features(raw_text: str, cleaned_text: str) -> np.ndarray:
+    """
+    Build the 9 structural features from raw job text.
+
+    Note: has_salary, has_logo, has_questions, telecommuting are CSV metadata
+    that don't exist in raw text input — we set them to 0.
+    The text-derived features (title_len, desc_len, etc.) ARE computable.
+    """
+    text_len = len(raw_text)
+    # Approximate: we don't have separate title/description/profile fields
+    # from raw text, so we use the full text length as desc_len and set
+    # profile_len to 0 (unknown) which will trigger no_profile=1
+    return np.array([[
+        0,                          # has_salary — unknown from raw text
+        0,                          # has_logo — unknown from raw text
+        0,                          # has_questions — unknown from raw text
+        0,                          # telecommuting — unknown from raw text
+        min(text_len, 200),         # title_len — approximate with capped text length
+        text_len,                   # desc_len — use full text length
+        0,                          # profile_len — unknown from raw text
+        int(text_len < 200),        # short_desc — flag if text is very short
+        1,                          # no_profile — no company profile available
+    ]], dtype=float)
 
 
 # Helpers
@@ -118,14 +163,14 @@ async def predict(body: PredictRequest):
     Classify a job posting as Real or Fake.
 
     - **job_text**: The full text of the job posting.
-    - **model_name**: `"logistic_regression"` (default) or `"naive_bayes"`.
+    - **model_name**: `"xgboost"` (default) or `"logistic_regression"`.
     """
     model = _MODELS.get(body.model_name)
     if model is None:
         raise HTTPException(
             status_code=400,
             detail=f"Unknown model '{body.model_name}'. "
-                   "Choose 'naive_bayes' or 'logistic_regression'."
+                   "Choose 'xgboost' or 'logistic_regression'."
         )
 
     # 1. Clean text
@@ -133,20 +178,33 @@ async def predict(body: PredictRequest):
     if not cleaned.strip():
         raise HTTPException(status_code=422, detail="Job text is too short or contains no meaningful words.")
 
-    # 2. Vectorise
-    X = _TFIDF.transform([cleaned])
+    # 2. Vectorise text with TF-IDF
+    X_tfidf = _TFIDF.transform([cleaned])
 
-    # 3. Predict
-    label     = int(model.predict(X)[0])          # 0 = Real, 1 = Fake
-    proba     = model.predict_proba(X)[0]          # [P(Real), P(Fake)]
-    confidence = float(proba[label])
+    # 3. Build structural features and combine with TF-IDF
+    struct = _build_structural_features(body.job_text, cleaned)
+    X_struct_sparse = sp.csr_matrix(struct)
+    X = sp.hstack([X_tfidf, X_struct_sparse])
+
+    # 4. Predict using probability + threshold
+    proba = model.predict_proba(X)[0]          # [P(Real), P(Fake)]
+    fake_prob = float(proba[1])
+
+    # Use tuned threshold from config if available
+    if body.model_name == "xgboost":
+        threshold = _CONFIG.get("xgb_threshold", 0.5)
+    else:
+        threshold = _CONFIG.get("lr_threshold", 0.5)
+
+    label = 1 if fake_prob >= threshold else 0
+    confidence = fake_prob if label == 1 else (1.0 - fake_prob)
 
     prediction = "Fake" if label == 1 else "Real"
     risk_level = _get_risk_level(confidence, prediction)
     keywords   = _extract_suspicious_keywords(cleaned)
     explanation = _build_explanation(prediction, confidence, risk_level, keywords)
 
-    # 4. Persist to SQLite
+    # 5. Persist to SQLite
     save_prediction(
         job_text            = body.job_text,
         prediction          = prediction,

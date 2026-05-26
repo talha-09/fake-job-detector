@@ -1,5 +1,5 @@
 /*   
-   Dashboard Page — Technical Benchmark & Diagnostic Styles
+ Dashboard Page — Technical Benchmark & Diagnostic Styles
 */
 
 .dashboard-header {
@@ -101,7 +101,7 @@
   font-weight: 700;
 }
 
-.dashboard-table .highlight-nb {
+.dashboard-table .highlight-xgb {
   color: var(--text-primary);
 }
 

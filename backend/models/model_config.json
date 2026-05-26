@@ -1,0 +1,17 @@
+{
+  "lr_threshold": 0.761,
+  "xgb_threshold": 0.5661,
+  "best_model": "xgboost",
+  "struct_cols": [
+    "has_salary",
+    "has_logo",
+    "has_questions",
+    "telecommuting",
+    "title_len",
+    "desc_len",
+    "profile_len",
+    "short_desc",
+    "no_profile"
+  ],
+  "n_tfidf_features": 5000
+}

@@ -9,13 +9,13 @@ with urllib.request.urlopen(f"{base}/health") as r:
 # 2. Metrics
 with urllib.request.urlopen(f"{base}/api/metrics") as r:
     m = json.loads(r.read())
-    print("NB  accuracy:", m["naive_bayes"]["accuracy"])
+    print("XGB accuracy:", m["xgboost"]["accuracy"])
     print("LR  accuracy:", m["logistic_regression"]["accuracy"])
 
 # 3. Predict FAKE
 fake_payload = json.dumps({
     "job_text": "Work from home data entry job! Earn 5000 dollars per week typing. No experience needed. Training provided. Send your bank details to apply immediately. Unlimited earning potential!",
-    "model_name": "logistic_regression"
+    "model_name": "xgboost"
 }).encode()
 req = urllib.request.Request(f"{base}/api/predict", data=fake_payload,
                              headers={"Content-Type": "application/json"}, method="POST")
@@ -27,7 +27,7 @@ with urllib.request.urlopen(req) as r:
 # 4. Predict REAL
 real_payload = json.dumps({
     "job_text": "Senior Software Engineer at Google. We are looking for experienced engineers with 5+ years of Python, distributed systems, and cloud infrastructure. Competitive salary, health benefits, and equity. Apply with resume and GitHub.",
-    "model_name": "logistic_regression"
+    "model_name": "xgboost"
 }).encode()
 req2 = urllib.request.Request(f"{base}/api/predict", data=real_payload,
                               headers={"Content-Type": "application/json"}, method="POST")

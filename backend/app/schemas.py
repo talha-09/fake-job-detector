@@ -18,9 +18,9 @@ class PredictRequest(BaseModel):
         examples=["Software Engineer needed at Acme Corp. Must know Python..."],
     )
     model_name: str = Field(
-        default="logistic_regression",
-        description="Which model to use: 'naive_bayes' or 'logistic_regression'.",
-        pattern="^(naive_bayes|logistic_regression)$",
+        default="xgboost",
+        description="Which model to use: 'xgboost' or 'logistic_regression'.",
+        pattern="^(xgboost|logistic_regression)$",
     )
 
 
@@ -39,6 +39,9 @@ class ModelMetrics(BaseModel):
     precision:         float
     recall:            float
     f1_score:          float
+    roc_auc:           Optional[float] = None
+    pr_auc:            Optional[float] = None
+    threshold:         Optional[float] = None
     confusion_matrix:  List[List[int]]
 
 
@@ -50,9 +53,10 @@ class DatasetInfo(BaseModel):
 
 
 class MetricsResponse(BaseModel):
-    naive_bayes:          ModelMetrics
+    xgboost:              ModelMetrics
     logistic_regression:  ModelMetrics
     dataset:              DatasetInfo
+    best_model:           Optional[str] = None
 
 
 class PredictionRecord(BaseModel):

@@ -17,7 +17,7 @@ import "./Analyze.css";
 
 export default function Analyze() {
   const [jobText, setJobText] = useState("");
-  const [modelName, setModelName] = useState("logistic_regression");
+  const [modelName, setModelName] = useState("xgboost");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -73,7 +73,7 @@ export default function Analyze() {
                 <span className="terminal-dot green" />
                 <span className="terminal-filename">job_description.txt</span>
               </div>
-              
+
               <textarea
                 id="job-text-input"
                 className="analyze-textarea"
@@ -92,11 +92,11 @@ export default function Analyze() {
                     value={modelName}
                     onChange={(e) => setModelName(e.target.value)}
                   >
+                    <option value="xgboost">
+                      XGBoost [98.6% Accuracy]
+                    </option>
                     <option value="logistic_regression">
                       Logistic Regression [98.0% Accuracy]
-                    </option>
-                    <option value="naive_bayes">
-                      Naive Bayes [90.7% Accuracy]
                     </option>
                   </select>
                 </div>
@@ -133,9 +133,9 @@ export default function Analyze() {
             <Loader2 size={24} className="analyze-spinner-icon" />
             <p className="mono-label animate-pulse">
               Tokenising text via TF-IDF vectoriser... Running{" "}
-              {modelName === "logistic_regression"
-                ? "logistic_regression_model"
-                : "naive_bayes_model"}
+              {modelName === "xgboost"
+                ? "xgboost_model"
+                : "logistic_regression_model"}
               ...
             </p>
           </div>
@@ -145,7 +145,7 @@ export default function Analyze() {
         {result && (
           <div className="result-container animate-fade-in-up">
             <div className={`analyze-result ${isFake ? "scam-audit" : "safe-audit"}`}>
-              
+
               {/* Memorandum Header Block */}
               <div className="memo-header-block">
                 <div className="memo-brand-stamp">
@@ -176,9 +176,9 @@ export default function Analyze() {
                   <div className="meta-item">
                     <span className="meta-key mono-label">Audit Engine:</span>
                     <span className="meta-val mono-label">
-                      {result.model_used === "logistic_regression"
-                        ? "LOGISTIC_REGRESSION_V1"
-                        : "NAIVE_BAYES_V1"}
+                      {result.model_used === "xgboost"
+                        ? "XGBOOST_V1"
+                        : "LOGISTIC_REGRESSION_V1"}
                     </span>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export default function Analyze() {
 
               {/* Statistical Ledger Breakdown */}
               <div className="analyze-details">
-                
+
                 {/* Row 1: Model Certainty */}
                 <div className="analyze-detail-row">
                   <div className="analyze-detail-label mono-label">

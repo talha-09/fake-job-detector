@@ -42,7 +42,7 @@ app = FastAPI(
     title       = "Fake Job Posting Detection API",
     description = (
         "An explainable AI system that classifies job postings as Real or Fake "
-        "using Naive Bayes and Logistic Regression models trained on the "
+        "using XGBoost and Logistic Regression models trained on the "
         "Kaggle Fake Job Postings dataset (17,880 records)."
     ),
     version     = "1.0.0",

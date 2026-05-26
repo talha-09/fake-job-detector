@@ -20,14 +20,15 @@ const api = axios.create({
 
 /**
  * predictJob — Sends job posting text to the backend for classification.
- * The backend cleans the text, vectorizes it with TF-IDF, and runs the
- * selected model (Naive Bayes or Logistic Regression) to return a verdict.
+ * The backend cleans the text, vectorizes it with TF-IDF, combines with
+ * structural features, and runs the selected model (XGBoost or Logistic
+ * Regression) to return a verdict.
  *
  * @param {string} jobText    — The raw job posting text to analyze
- * @param {string} modelName  — Which model to use: "naive_bayes" or "logistic_regression"
+ * @param {string} modelName  — Which model to use: "xgboost" or "logistic_regression"
  * @returns {Promise<{prediction, confidence, model_used, risk_level, suspicious_keywords, explanation}>}
  */
-export async function predictJob(jobText, modelName = "logistic_regression") {
+export async function predictJob(jobText, modelName = "xgboost") {
   const { data } = await api.post("/predict", {
     job_text: jobText,
     model_name: modelName,
@@ -46,8 +47,8 @@ export async function getHistory() {
 }
 
 /**
- * getMetrics — Retrieves model performance metrics (accuracy, precision, recall, F1)
- * and confusion matrices for both Naive Bayes and Logistic Regression models.
+ * getMetrics — Retrieves model performance metrics (accuracy, precision, recall, F1,
+ * ROC-AUC, PR-AUC) and confusion matrices for both XGBoost and Logistic Regression.
  * This data is read from the model_metrics.json file generated during training.
  */
 export async function getMetrics() {

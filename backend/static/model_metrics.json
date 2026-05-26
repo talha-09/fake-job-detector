@@ -1,33 +1,39 @@
 {
-  "naive_bayes": {
-    "accuracy": 0.9231,
-    "precision": 0.3786,
-    "recall": 0.9191,
-    "f1_score": 0.5363,
+  "xgboost": {
+    "accuracy": 0.9863,
+    "precision": 0.9133,
+    "recall": 0.7919,
+    "f1_score": 0.8483,
+    "roc_auc": 0.9874,
+    "pr_auc": 0.911,
+    "threshold": 0.5661,
     "confusion_matrix": [
       [
-        3142,
-        261
+        3390,
+        13
       ],
       [
-        14,
-        159
+        36,
+        137
       ]
     ]
   },
   "logistic_regression": {
-    "accuracy": 0.9804,
-    "precision": 0.7537,
-    "recall": 0.8844,
-    "f1_score": 0.8138,
+    "accuracy": 0.9799,
+    "precision": 0.7886,
+    "recall": 0.7977,
+    "f1_score": 0.7931,
+    "roc_auc": 0.9881,
+    "pr_auc": 0.8731,
+    "threshold": 0.761,
     "confusion_matrix": [
       [
-        3353,
-        50
+        3366,
+        37
       ],
       [
-        20,
-        153
+        35,
+        138
       ]
     ]
   },
@@ -36,5 +42,6 @@
     "real_postings": 17014,
     "fake_postings": 866,
     "fake_percent": 4.84
-  }
+  },
+  "best_model": "xgboost"
 }

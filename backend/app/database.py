@@ -34,7 +34,7 @@ def init_db() -> None:
                 job_text            TEXT    NOT NULL,
                 prediction          TEXT    NOT NULL,   -- 'Fake' or 'Real'
                 confidence          REAL    NOT NULL,   -- 0.0 – 1.0
-                model_used          TEXT    NOT NULL,   -- 'naive_bayes' | 'logistic_regression'
+                model_used          TEXT    NOT NULL,   -- 'xgboost' | 'logistic_regression'
                 risk_level          TEXT    NOT NULL,   -- 'High' | 'Medium' | 'Low'
                 suspicious_keywords TEXT    NOT NULL,   -- JSON array stored as string
                 explanation         TEXT    NOT NULL,
