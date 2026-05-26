@@ -46,9 +46,7 @@ STOP_WORDS = set(stopwords.words("english"))
 
 
 # STEP 1: Load & Inspect Data
-print("=" * 60)
-print("STEP 1: Loading Dataset")
-print("=" * 60)
+print("\nLoading dataset...")
 
 df = pd.read_csv(DATA_PATH)
 print(f"  Rows     : {df.shape[0]:,}")
@@ -58,9 +56,7 @@ print(f"  Fake jobs: {(df['fraudulent'] == 1).sum():,}  ({df['fraudulent'].mean(
 
 
 # STEP 2: Combine Text Columns
-print("\n" + "=" * 60)
-print("STEP 2: Combining Text Columns")
-print("=" * 60)
+print("\nCombining text fields...")
 
 TEXT_COLS = ["title", "company_profile", "description", "requirements", "benefits"]
 df["combined_text"] = df[TEXT_COLS].fillna("").agg(" ".join, axis=1)
@@ -68,9 +64,7 @@ print(f"  Combined columns: {TEXT_COLS}")
 
 
 # STEP 3: Clean Text
-print("\n" + "=" * 60)
-print("STEP 3: Cleaning Text")
-print("=" * 60)
+print("\nCleaning text...")
 
 def clean_text(text: str) -> str:
     """Lowercase, strip HTML, remove non-letters, remove stopwords."""
@@ -86,9 +80,7 @@ print("  Text cleaning done.")
 
 
 # STEP 4: Structural Features
-print("\n" + "=" * 60)
-print("STEP 4: Building Structural Features")
-print("=" * 60)
+print("\nBuilding structural (non-text) features...")
 
 df["has_salary"]       = df["salary_range"].notna().astype(int)
 df["has_logo"]         = df["has_company_logo"].astype(int)
@@ -112,9 +104,7 @@ print(f"  Jobs with company logo   : {df['has_logo'].sum():,} / {len(df):,}")
 
 
 # STEP 5: TF-IDF Vectorization
-print("\n" + "=" * 60)
-print("STEP 5: TF-IDF Vectorization")
-print("=" * 60)
+print("\nVectorizing text with TF-IDF...")
 
 tfidf = TfidfVectorizer(
     max_features=5000,
@@ -134,62 +124,66 @@ print(f"  Combined shape   : {X.shape}  (TF-IDF + {len(STRUCT_COLS)} structural 
 
 
 # STEP 6: Train / Test Split
-print("\n" + "=" * 60)
-print("STEP 6: Train / Test Split (80 / 20)")
-print("=" * 60)
+print("\nSplitting the dataset (train/val/test = 60/20/20)...")
 
-X_train, X_test, y_train, y_test = train_test_split(
+# Keep the same test split size (20%) as your existing evaluation code.
+X_trainval, X_test, y_trainval, y_test = train_test_split(
     X, y,
     test_size=0.2,
     random_state=42,
     stratify=y
 )
-print(f"  Train samples: {X_train.shape[0]:,}")
-print(f"  Test  samples: {X_test.shape[0]:,}")
-print(f"  Train fake   : {y_train.sum()}")
-print(f"  Test  fake   : {y_test.sum()}")
 
-# Class imbalance ratio — used by XGBoost
+# Split remaining 80% into train and validation.
+X_train, X_val, y_train, y_val = train_test_split(
+    X_trainval, y_trainval,
+    test_size=0.25,          # 0.25 * 0.80 = 0.20 overall
+    random_state=42,
+    stratify=y_trainval
+)
+
+print(f"  Train samples: {X_train.shape[0]:,}")
+print(f"  Val   samples: {X_val.shape[0]:,}")
+print(f"  Test  samples: {X_test.shape[0]:,}")
+print(f"  Train fake   : {int(y_train.sum())}")
+print(f"  Val   fake   : {int(y_val.sum())}")
+print(f"  Test  fake   : {int(y_test.sum())}")
+
+# Class imbalance ratio — used by XGBoost (train only)
 neg = (y_train == 0).sum()
 pos = (y_train == 1).sum()
 imbalance_ratio = round(neg / pos, 2)
-print(f"  Imbalance ratio (real/fake): {imbalance_ratio}")
+print(f"  Imbalance ratio (real/fake) [train]: {imbalance_ratio}")
 
 
-# STEP 7: Handle Class Imbalance with SMOTE (for LR only)
-print("\n" + "=" * 60)
-print("STEP 7: Applying SMOTE to Balance Training Set (for LR)")
-print("=" * 60)
-
+# Balance class distribution (Logistic Regression only)
+print("\nBalancing training data with SMOTE (for LR only)...")
 smote = SMOTE(random_state=42)
 X_train_bal, y_train_bal = smote.fit_resample(X_train, y_train)
 print(f"  Before SMOTE — Real: {(y_train == 0).sum()}, Fake: {(y_train == 1).sum()}")
 print(f"  After  SMOTE — Real: {(y_train_bal == 0).sum()}, Fake: {(y_train_bal == 1).sum()}")
 
 
-# STEP 8: Train Logistic Regression (with SMOTE-balanced data)
-print("\n" + "=" * 60)
-print("STEP 8: Training Logistic Regression (SMOTE + combined features)")
-print("=" * 60)
-
+# Train Logistic Regression (threshold tuned on validation)
+print("\nTraining Logistic Regression...")
 lr_model = LogisticRegression(
-    max_iter=1000,
+    max_iter=3000,
     C=1.0,
     solver="lbfgs",
     random_state=42
 )
 lr_model.fit(X_train_bal, y_train_bal)
 
-# Raw probabilities for threshold tuning
-lr_probs = lr_model.predict_proba(X_test)[:, 1]
-
-# Find best threshold: highest F1 on test set
-precision_vals, recall_vals, thresholds = precision_recall_curve(y_test, lr_probs)
+# Threshold selection on VAL (not test)
+lr_probs_val = lr_model.predict_proba(X_val)[:, 1]
+precision_vals, recall_vals, thresholds = precision_recall_curve(y_val, lr_probs_val)
 f1_vals = 2 * precision_vals * recall_vals / (precision_vals + recall_vals + 1e-8)
 best_idx = f1_vals[:-1].argmax()
 best_threshold = thresholds[best_idx]
-print(f"  Best threshold (max F1): {best_threshold:.3f}")
+print(f"  LR best threshold (max F1 on validation): {best_threshold:.3f}")
 
+# Final predictions on TEST
+lr_probs = lr_model.predict_proba(X_test)[:, 1]
 lr_pred = (lr_probs >= best_threshold).astype(int)
 
 lr_acc  = accuracy_score(y_test, lr_pred)
@@ -199,21 +193,19 @@ lr_f1   = f1_score(y_test, lr_pred, zero_division=0)
 lr_roc  = roc_auc_score(y_test, lr_probs)
 lr_pr   = average_precision_score(y_test, lr_probs)
 
+print("\nLogistic Regression — final on TEST")
 print(f"  Accuracy : {lr_acc*100:.2f}%")
 print(f"  Precision: {lr_prec*100:.2f}%")
 print(f"  Recall   : {lr_rec*100:.2f}%")
 print(f"  F1 Score : {lr_f1*100:.2f}%")
 print(f"  ROC-AUC  : {lr_roc:.4f}")
 print(f"  PR-AUC   : {lr_pr:.4f}")
-print("\n  Full Classification Report:")
+print("  Classification report:")
 print(classification_report(y_test, lr_pred, target_names=["Real", "Fake"]))
 
 
-# STEP 9: Train XGBoost
-print("\n" + "=" * 60)
-print("STEP 9: Training XGBoost")
-print("=" * 60)
-
+# Train XGBoost (threshold tuned on validation)
+print("\nTraining XGBoost...")
 xgb_model = XGBClassifier(
     scale_pos_weight=imbalance_ratio,
     n_estimators=300,
@@ -227,15 +219,15 @@ xgb_model = XGBClassifier(
 )
 xgb_model.fit(X_train, y_train)
 
-xgb_probs = xgb_model.predict_proba(X_test)[:, 1]
-
-# Threshold tuning for XGBoost
-xgb_prec_vals, xgb_rec_vals, xgb_thresholds = precision_recall_curve(y_test, xgb_probs)
+xgb_probs_val = xgb_model.predict_proba(X_val)[:, 1]
+xgb_prec_vals, xgb_rec_vals, xgb_thresholds = precision_recall_curve(y_val, xgb_probs_val)
 xgb_f1_vals = 2 * xgb_prec_vals * xgb_rec_vals / (xgb_prec_vals + xgb_rec_vals + 1e-8)
 xgb_best_idx = xgb_f1_vals[:-1].argmax()
 xgb_best_threshold = xgb_thresholds[xgb_best_idx]
-print(f"  Best threshold (max F1): {xgb_best_threshold:.3f}")
+print(f"  XGB best threshold (max F1 on validation): {xgb_best_threshold:.3f}")
 
+# Final predictions on TEST
+xgb_probs = xgb_model.predict_proba(X_test)[:, 1]
 xgb_pred = (xgb_probs >= xgb_best_threshold).astype(int)
 
 xgb_acc  = accuracy_score(y_test, xgb_pred)
@@ -245,34 +237,28 @@ xgb_f1   = f1_score(y_test, xgb_pred, zero_division=0)
 xgb_roc  = roc_auc_score(y_test, xgb_probs)
 xgb_pr   = average_precision_score(y_test, xgb_probs)
 
+print("\nXGBoost — final on TEST")
 print(f"  Accuracy : {xgb_acc*100:.2f}%")
 print(f"  Precision: {xgb_prec*100:.2f}%")
 print(f"  Recall   : {xgb_rec*100:.2f}%")
 print(f"  F1 Score : {xgb_f1*100:.2f}%")
 print(f"  ROC-AUC  : {xgb_roc:.4f}")
 print(f"  PR-AUC   : {xgb_pr:.4f}")
-print("\n  Full Classification Report:")
+print("  Classification report:")
 print(classification_report(y_test, xgb_pred, target_names=["Real", "Fake"]))
 
 
 # STEP 10: Model Comparison
-print("\n" + "=" * 60)
-print("STEP 10: Model Comparison")
-print("=" * 60)
-
-print(f"  {'Model':<25} {'F1':>6}  {'Precision':>10}  {'Recall':>8}  {'PR-AUC':>8}")
-print(f"  {'-'*60}")
-print(f"  {'Logistic Regression':<25} {lr_f1*100:>5.2f}%  {lr_prec*100:>9.2f}%  {lr_rec*100:>7.2f}%  {lr_pr:>8.4f}")
-print(f"  {'XGBoost':<25} {xgb_f1*100:>5.2f}%  {xgb_prec*100:>9.2f}%  {xgb_rec*100:>7.2f}%  {xgb_pr:>8.4f}")
+print("\nModel comparison (using TEST set PR-AUC as the tie-breaker)...")
+print(f"  Logistic Regression: F1={lr_f1*100:.2f}%, Precision={lr_prec*100:.2f}%, Recall={lr_rec*100:.2f}%, PR-AUC={lr_pr:.4f}")
+print(f"  XGBoost            : F1={xgb_f1*100:.2f}%, Precision={xgb_prec*100:.2f}%, Recall={xgb_rec*100:.2f}%, PR-AUC={xgb_pr:.4f}")
 
 best_model_name = "xgboost" if xgb_pr > lr_pr else "logistic_regression"
-print(f"\n  Best model by PR-AUC: {best_model_name.upper()}")
+print(f"  Recommended default model: {best_model_name.upper()}")
 
 
 # STEP 11: Save Models + Vectorizer + Config
-print("\n" + "=" * 60)
-print("STEP 11: Saving Models & Vectorizer")
-print("=" * 60)
+print("\nSaving artifacts (models, vectorizer, and thresholds)...")
 
 joblib.dump(lr_model,   os.path.join(MODELS_DIR, "logistic_regression_model.pkl"))
 joblib.dump(xgb_model,  os.path.join(MODELS_DIR, "xgboost_model.pkl"))
@@ -296,9 +282,7 @@ print("  Saved: models/model_config.json")
 
 
 # STEP 12: Save Metrics JSON
-print("\n" + "=" * 60)
-print("STEP 12: Saving Metrics JSON")
-print("=" * 60)
+print("\nSaving benchmark metrics for the dashboard...")
 
 lr_cm  = confusion_matrix(y_test, lr_pred)
 xgb_cm = confusion_matrix(y_test, xgb_pred)
@@ -340,9 +324,7 @@ print(f"  Saved: static/model_metrics.json")
 
 
 # STEP 13: Suspicious Keywords (from LR coefficients)
-print("\n" + "=" * 60)
-print("STEP 13: Extracting Top Suspicious Keywords")
-print("=" * 60)
+print("\nExtracting top suspicious keywords (from LR coefficients)...")
 
 feature_names = np.array(
     tfidf.get_feature_names_out().tolist() + STRUCT_COLS
@@ -372,9 +354,7 @@ print(f"  Saved: static/suspicious_keywords.json")
 
 
 # DONE
-print("\n" + "=" * 60)
-print("[DONE] TRAINING COMPLETE")
-print("=" * 60)
+print("\nTraining complete.")
 print(f"\n  Logistic Regression  — F1: {lr_f1*100:.2f}%  PR-AUC: {lr_pr:.4f}")
 print(f"  XGBoost              — F1: {xgb_f1*100:.2f}%  PR-AUC: {xgb_pr:.4f}")
 print(f"\n  Best model: {best_model_name.upper()}")

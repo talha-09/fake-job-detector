@@ -1,39 +1,39 @@
 {
   "xgboost": {
-    "accuracy": 0.9863,
-    "precision": 0.9133,
-    "recall": 0.7919,
-    "f1_score": 0.8483,
-    "roc_auc": 0.9874,
-    "pr_auc": 0.911,
-    "threshold": 0.5661,
+    "accuracy": 0.9852,
+    "precision": 0.9545,
+    "recall": 0.7283,
+    "f1_score": 0.8262,
+    "roc_auc": 0.9857,
+    "pr_auc": 0.9007,
+    "threshold": 0.6754,
     "confusion_matrix": [
       [
-        3390,
-        13
+        3397,
+        6
       ],
       [
-        36,
-        137
+        47,
+        126
       ]
     ]
   },
   "logistic_regression": {
-    "accuracy": 0.9799,
-    "precision": 0.7886,
-    "recall": 0.7977,
-    "f1_score": 0.7931,
-    "roc_auc": 0.9881,
-    "pr_auc": 0.8731,
-    "threshold": 0.761,
+    "accuracy": 0.9807,
+    "precision": 0.8291,
+    "recall": 0.7572,
+    "f1_score": 0.7915,
+    "roc_auc": 0.9894,
+    "pr_auc": 0.884,
+    "threshold": 0.7549,
     "confusion_matrix": [
       [
-        3366,
-        37
+        3376,
+        27
       ],
       [
-        35,
-        138
+        42,
+        131
       ]
     ]
   },

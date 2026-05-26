@@ -138,7 +138,7 @@ def rebuild_test_set():
 
 
 # Load models & data
-print("Loading models & rebuilding test set...")
+print("Loading models and preparing the test set...")
 lr_model  = joblib.load(os.path.join(MODELS_DIR, "logistic_regression_model.pkl"))
 xgb_model = joblib.load(os.path.join(MODELS_DIR, "xgboost_model.pkl"))
 tfidf     = joblib.load(os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl"))
@@ -180,11 +180,11 @@ xgb_f1_val   = f1_score(y_test, xgb_pred, zero_division=0)
 with open(os.path.join(STATIC_DIR, "model_metrics.json")) as f:
     metrics = json.load(f)
 
-print("Models loaded. Generating charts...\n")
+print("Models are loaded. Generating charts...\n")
 
 
 # CHART 1: Side-by-side Confusion Matrices
-print("  [1/7] Confusion Matrices (side-by-side)")
+print("Making confusion matrices (LR vs XGBoost)...")
 fig, axes = plt.subplots(1, 2, figsize=(13, 5))
 fig.suptitle("Confusion Matrices — Fake Job Detection", fontsize=13, color=WHITE, y=1.02)
 
@@ -230,7 +230,7 @@ print(f"    Saved: {cm_path}")
 
 
 # CHART 2: Precision-Recall Curves
-print("  [2/7] Precision-Recall Curves")
+print("Plotting precision-recall curves...")
 fig, ax = plt.subplots(figsize=(8, 6))
 fig.suptitle("Precision-Recall Curves", fontsize=13, color=WHITE)
 
@@ -270,7 +270,7 @@ print(f"    Saved: {pr_path}")
 
 
 # CHART 3: ROC Curves
-print("  [3/7] ROC Curves")
+print("Plotting ROC curves...")
 fig, ax = plt.subplots(figsize=(7, 6))
 fig.suptitle("ROC Curves", fontsize=13, color=WHITE)
 
@@ -299,7 +299,7 @@ print(f"    Saved: {roc_path}")
 
 
 # CHART 4: Metrics Bar Chart — side-by-side comparison
-print("  [4/7] Metrics Comparison Bar Chart")
+print("Building the metrics comparison bar chart...")
 metric_labels = ["Accuracy", "Precision", "Recall", "F1 Score", "ROC-AUC", "PR-AUC"]
 lr_vals  = [lr_acc,      lr_prec_val,  lr_rec_val,  lr_f1_val,  lr_roc,  lr_pr]
 xgb_vals = [xgb_acc,     xgb_prec_val, xgb_rec_val, xgb_f1_val, xgb_roc, xgb_pr]
@@ -342,7 +342,7 @@ print(f"    Saved: {bar_path}")
 
 
 # CHART 5: Top 20 Suspicious Keywords (from LR coefficients)
-print("  [5/7] Suspicious Keywords")
+print("Extracting the top suspicious keywords...")
 
 with open(os.path.join(STATIC_DIR, "suspicious_keywords.json"), "r") as f:
     kw_data = json.load(f)
@@ -378,7 +378,7 @@ print(f"    Saved: {kw_path}")
 
 
 # CHART 6: Dataset Distribution (donut chart)
-print("  [6/7] Dataset Distribution")
+print("Creating the dataset distribution chart...")
 
 real_count = int((df["fraudulent"] == 0).sum())
 fake_count = int((df["fraudulent"] == 1).sum())
@@ -419,7 +419,7 @@ print(f"    Saved: {dist_path}")
 
 
 # CHART 7: Structural Feature Signal Strengths
-print("  [7/7] Structural Feature Signals")
+print("Summarizing structural feature signals...")
 
 struct_signals = kw_data.get("structural_signals", [])
 
@@ -459,10 +459,7 @@ else:
 
 
 # SUMMARY
-print()
-print("=" * 60)
-print("EVALUATION COMPLETE — All charts saved!")
-print("=" * 60)
+print("\nCharts generation finished.")
 charts = [
     "confusion_matrices.png",
     "pr_curves.png",
@@ -472,10 +469,10 @@ charts = [
     "dataset_distribution.png",
     "structural_signals.png",
 ]
-print("\n  Charts saved to backend/static/:")
+print("\nSaved files in backend/static/:")
 for c in charts:
     path = os.path.join(STATIC_DIR, c)
     exists = "YES" if os.path.exists(path) else "NO"
     print(f"    {exists} {c}")
 
-print("\n  =>  Evaluation COMPLETE — Charts ready for frontend!")
+print("\nCharts are ready for the frontend dashboard.")
