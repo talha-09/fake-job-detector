@@ -1,6 +1,6 @@
-# JobGuard AI — Explainable Fake Job Posting Detection
+# JobFraud AI — Explainable Fake Job Posting Detection
 
-JobGuard AI is a full-stack machine learning application that classifies job postings as legitimate or fraudulent. The system combines a React single-page application with a FastAPI backend, trained classifiers, and a local persistence layer so users can analyze postings, review model benchmarks, and audit past predictions.
+JobFraud AI is a full-stack machine learning application that classifies job postings as legitimate or fraudulent. The system combines a React single-page application with a FastAPI backend, trained classifiers, and a local persistence layer so users can analyze postings, review model benchmarks, and audit past predictions.
 
 The models are trained on the public [Fake Job Posting Prediction](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction) dataset (17,880 labeled records). The minority class (fraudulent postings) represents approximately 4.8% of the corpus, which informs the training strategy and evaluation metrics documented below.
 
