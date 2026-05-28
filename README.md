@@ -195,7 +195,7 @@ Models are loaded once at application startup (module import time in `predict.py
 
 ```bash
 git clone <repository-url>
-cd "Fake Email Project"
+cd "Fake Job Detection Project"
 ```
 
 ### 2. Backend setup
