@@ -6,7 +6,7 @@ Run with:
     .\\venv\\Scripts\\Activate
     uvicorn app.main:app --reload --port 8000
 
-Swagger UI available at: http://localhost:8000/docs
+Swagger UI: http://localhost:8000/docs  (disabled in production)
 """
 
 import os
@@ -32,12 +32,25 @@ os.makedirs(_STATIC_DIR, exist_ok=True)
 async def lifespan(app: FastAPI):
     """Initialise the database on startup."""
     init_db()
-    print("[main] FastAPI is ready. Visit http://localhost:8000/docs")
+    print("[main] FastAPI is ready.")
     yield
     print("[main] FastAPI shutting down.")
 
 
-# App instance
+# Environment — set ENVIRONMENT=production on Render to disable docs UI
+_ENV = os.getenv("ENVIRONMENT", "development")
+_IS_PROD = _ENV == "production"
+
+# CORS — load allowed origins from env var (comma-separated) for security.
+# In production set: ALLOWED_ORIGINS=https://your-app.vercel.app
+_raw_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:3000",  # dev fallback only
+)
+_ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
+
+# App instance — docs disabled in production to avoid exposing API surface
 app = FastAPI(
     title       = "Fake Job Posting Detection API",
     description = (
@@ -47,6 +60,9 @@ app = FastAPI(
     ),
     version     = "1.0.0",
     lifespan    = lifespan,
+    docs_url    = None if _IS_PROD else "/docs",
+    redoc_url   = None if _IS_PROD else "/redoc",
+    openapi_url = None if _IS_PROD else "/openapi.json",
 )
 
 
@@ -54,14 +70,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",       # Vite dev server
-        "http://localhost:3000",       # fallback
-        "https://fake-job-detector.vercel.app",  # production (update after deploy)
-    ],
-    allow_credentials = True,
-    allow_methods     = ["*"],
-    allow_headers     = ["*"],
+    allow_origins     = _ALLOWED_ORIGINS,
+    allow_credentials = False,          # No cookies/auth headers used — keep False
+    allow_methods     = ["GET", "POST"], # Only what the API actually needs
+    allow_headers     = ["Content-Type", "Accept"],
 )
 
 
@@ -80,7 +92,7 @@ async def root():
     return {
         "status":  "running",
         "message": "Fake Job Posting Detection API",
-        "docs":    "http://localhost:8000/docs",
+        "docs":    "/docs",
     }
 
 

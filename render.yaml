@@ -1,0 +1,19 @@
+services:
+  # ── Backend: FastAPI on Render Free Tier ───────────────────────────────────
+  - type: web
+    name: fake-job-detector-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python -c "import nltk; nltk.download('stopwords', quiet=True)"
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: ENVIRONMENT
+        value: production          # disables /docs and /redoc in prod
+      - key: ALLOWED_ORIGINS
+        # Set this in the Render dashboard to your real Vercel URL, e.g.:
+        # https://fake-job-detector.vercel.app
+        # Never commit real URLs — set them via the Render environment variables UI
+        sync: false
+    plan: free

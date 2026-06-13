@@ -45,4 +45,4 @@ with urllib.request.urlopen(f"{base}/api/history") as r:
     h = json.loads(r.read())
     print("HISTORY:", len(h), "records returned")
 
-print("\n=== ALL ENDPOINTS PASSED ===")
+print("\n***ALL ENDPOINTS PASSED ***")

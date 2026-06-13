@@ -1,6 +1,6 @@
 {
-  "lr_threshold": 0.7549,
-  "xgb_threshold": 0.6754,
+  "lr_threshold": 0.7456,
+  "xgb_threshold": 0.5849,
   "best_model": "xgboost",
   "struct_cols": [
     "has_salary",

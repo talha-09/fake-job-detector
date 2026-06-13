@@ -23,7 +23,7 @@ _METRICS_PATH = os.path.join(_STATIC_DIR, "model_metrics.json")
 
 # Endpoints
 @router.get("/metrics", response_model=MetricsResponse)
-async def get_metrics():
+def get_metrics():
     """
     Returns accuracy, precision, recall, F1 and confusion matrix
     for both trained models (read from model_metrics.json).
@@ -42,7 +42,7 @@ async def get_metrics():
 
 
 @router.get("/history", response_model=list[PredictionRecord])
-async def get_history():
+def get_history():
     """
     Returns the 100 most recent predictions, newest first.
     """
@@ -51,7 +51,7 @@ async def get_history():
 
 
 @router.get("/stats", response_model=StatsResponse)
-async def get_stats():
+def get_stats():
     """
     Returns aggregate counts:  total, fake, real, fake_percentage.
     """

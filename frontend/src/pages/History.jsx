@@ -17,6 +17,8 @@ export default function History() {
   const [records, setRecords] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 10;
 
   useEffect(() => {
     Promise.all([getHistory(), getStats()])
@@ -38,6 +40,11 @@ export default function History() {
       </div>
     );
   }
+
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = records.slice(indexOfFirstRecord, indexOfLastRecord);
+  const totalPages = Math.ceil(records.length / recordsPerPage);
 
   return (
     <div className="page">
@@ -99,16 +106,16 @@ export default function History() {
                 </tr>
               </thead>
               <tbody>
-                {records.map((rec, i) => (
+                {currentRecords.map((rec, i) => (
                   <tr key={rec.id}>
                     {/* Index */}
-                    <td className="history-index mono-label">{i + 1}</td>
+                    <td className="history-index mono-label">{indexOfFirstRecord + i + 1}</td>
 
                     {/* Truncated job description */}
-                    <td className="history-text-cell" title={rec.job_text}>
-                      {rec.job_text.length > 70
+                    <td className="history-text-cell" title={rec.job_text || ""}>
+                      {rec.job_text?.length > 70
                         ? rec.job_text.slice(0, 70) + "..."
-                        : rec.job_text}
+                        : rec.job_text || ""}
                     </td>
 
                     {/* Classification square badge */}
@@ -128,7 +135,7 @@ export default function History() {
 
                     {/* Tabular numeric confidence */}
                     <td className="history-confidence mono-label">
-                      {(rec.confidence * 100).toFixed(1)}%
+                      {rec.confidence != null ? (rec.confidence * 100).toFixed(1) : 0}%
                     </td>
 
                     {/* Risk Badge */}
@@ -142,30 +149,55 @@ export default function History() {
                             : "badge-real"
                         }`}
                       >
-                        {rec.risk_level}
+                        {rec.risk_level || "Unknown"}
                       </span>
                     </td>
 
                     {/* Engine Identifier */}
                     <td className="history-model mono-label">
-                      {rec.model_used === "logistic_regression" ? "LR_V1" : "NB_V1"}
+                      {rec.model_used === "logistic_regression" ? "LR_V1" : "XGB_V1"}
                     </td>
 
                     {/* Monospace simple timestamp */}
                     <td className="history-date mono-label">
-                      {new Date(rec.created_at).toLocaleDateString("en-US", {
+                      {rec.created_at ? new Date(rec.created_at).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "2-digit",
                         day: "2-digit",
                         hour: "2-digit",
                         minute: "2-digit",
                         hour12: false
-                      }).replace(',', '')}
+                      }).replace(',', '') : ""}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="pagination-controls" style={{ display: "flex", justifyContent: "space-between", padding: "16px 20px", borderTop: "1px solid var(--border)" }}>
+                <button 
+                  className="btn btn-outline" 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  style={{ padding: "6px 12px" }}
+                >
+                  Previous
+                </button>
+                <span className="mono-label" style={{ alignSelf: "center" }}>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button 
+                  className="btn btn-outline" 
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  style={{ padding: "6px 12px" }}
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

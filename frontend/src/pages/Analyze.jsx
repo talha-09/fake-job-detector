@@ -64,9 +64,9 @@ export default function Analyze() {
         </div>
 
         {/* Input Form — shown only when no result is loaded */}
-        {!result && !loading && (
+        {!result && (
           <form onSubmit={handleSubmit} className="animate-fade-in-up">
-            <div className="glass-card analyze-input-card">
+            <div className={`glass-card analyze-input-card ${loading ? "opacity-70" : ""}`}>
               <div className="textarea-terminal-header">
                 <span className="terminal-dot red" />
                 <span className="terminal-dot yellow" />
@@ -81,6 +81,7 @@ export default function Analyze() {
                 value={jobText}
                 onChange={(e) => setJobText(e.target.value)}
                 maxLength={10000}
+                disabled={loading}
               />
 
               <div className="analyze-controls">
@@ -91,12 +92,13 @@ export default function Analyze() {
                     id="model-select"
                     value={modelName}
                     onChange={(e) => setModelName(e.target.value)}
+                    disabled={loading}
                   >
                     <option value="xgboost">
-                      XGBoost [98.6% Accuracy]
+                      XGBoost [98.5% Accuracy]
                     </option>
                     <option value="logistic_regression">
-                      Logistic Regression [98.0% Accuracy]
+                      Logistic Regression [98.1% Accuracy]
                     </option>
                   </select>
                 </div>
@@ -109,10 +111,10 @@ export default function Analyze() {
                   type="submit"
                   className="btn btn-primary analyze-submit"
                   id="analyze-btn"
-                  disabled={jobText.trim().length < 20}
+                  disabled={jobText.trim().length < 20 || loading}
                 >
                   <Search size={13} />
-                  Analyze Text
+                  {loading ? 'Analyzing...' : 'Analyze Text'}
                 </button>
               </div>
             </div>

@@ -52,7 +52,7 @@ export default function Home() {
           <div className="hero-sidebar hero-anim-card">
             <div className="glass-card hero-highlight-card accent-card">
               <div className="mono-label">PRIMARY CLASSIFIER</div>
-              <div className="giant-metric-title">98.6%</div>
+              <div className="giant-metric-title">98.5%</div>
               <div className="mono-label text-dim">XGBoost Accuracy</div>
               <div className="divider-line" />
               <p className="stat-card-text">
@@ -71,7 +71,7 @@ export default function Home() {
           </div>
           <div className="glass-card home-stat">
             <ShieldCheck size={16} className="home-stat-icon" />
-            <div className="home-stat-value">98.6%</div>
+            <div className="home-stat-value">98.5%</div>
             <div className="mono-label stat-desc">XGBoost Accuracy</div>
           </div>
           <div className="glass-card home-stat">
@@ -81,7 +81,7 @@ export default function Home() {
           </div>
           <div className="glass-card home-stat">
             <ScaleIcon size={16} className="home-stat-icon" />
-            <div className="home-stat-value">4.8%</div>
+            <div className="home-stat-value">4.84%</div>
             <div className="mono-label stat-desc">Historic Scam Rate</div>
           </div>
         </div>

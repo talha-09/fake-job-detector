@@ -1,156 +1,162 @@
 {
   "keywords": [
     "link",
-    "data entry",
     "earn",
-    "high school",
+    "data entry",
     "aptitude",
+    "high school",
     "oil gas",
     "encouraged",
     "industry",
-    "receptionist",
-    "signing",
-    "leveraging",
-    "phone",
-    "administrative assistant",
-    "oil",
     "money",
-    "administrative",
+    "signing",
+    "phone",
+    "leveraging",
+    "oil",
     "staffing",
-    "offshore",
-    "compensation package",
-    "gas",
     "per",
-    "contract",
-    "efficient",
+    "administrative assistant",
+    "receptionist",
     "internet",
-    "cash",
+    "administrative",
     "perks",
+    "compensation package",
+    "efficient",
+    "contract",
     "referral",
+    "gas",
     "hired",
-    "entry",
-    "engineering"
+    "cash",
+    "offshore",
+    "engineering",
+    "gas industry",
+    "remote",
+    "flexible",
+    "ai",
+    "education",
+    "salary",
+    "bonus"
   ],
   "keywords_with_scores": [
     {
       "word": "link",
-      "score": 4.5227
-    },
-    {
-      "word": "data entry",
-      "score": 4.0599
+      "score": 4.4828
     },
     {
       "word": "earn",
-      "score": 3.9941
+      "score": 4.1003
     },
     {
-      "word": "high school",
-      "score": 3.8815
+      "word": "data entry",
+      "score": 4.095
     },
     {
       "word": "aptitude",
-      "score": 3.8445
+      "score": 3.8239
+    },
+    {
+      "word": "high school",
+      "score": 3.7389
     },
     {
       "word": "oil gas",
-      "score": 3.6184
+      "score": 3.5996
     },
     {
       "word": "encouraged",
-      "score": 3.412
+      "score": 3.5813
     },
     {
       "word": "industry",
-      "score": 3.2264
-    },
-    {
-      "word": "receptionist",
-      "score": 3.1363
-    },
-    {
-      "word": "signing",
-      "score": 3.0644
-    },
-    {
-      "word": "leveraging",
-      "score": 3.0222
-    },
-    {
-      "word": "phone",
-      "score": 3.0044
-    },
-    {
-      "word": "administrative assistant",
-      "score": 3.0016
-    },
-    {
-      "word": "oil",
-      "score": 2.9826
+      "score": 3.2392
     },
     {
       "word": "money",
-      "score": 2.9397
+      "score": 3.11
     },
     {
-      "word": "administrative",
-      "score": 2.8669
+      "word": "signing",
+      "score": 3.095
+    },
+    {
+      "word": "phone",
+      "score": 3.0926
+    },
+    {
+      "word": "leveraging",
+      "score": 3.0445
+    },
+    {
+      "word": "oil",
+      "score": 3.0003
     },
     {
       "word": "staffing",
-      "score": 2.862
-    },
-    {
-      "word": "offshore",
-      "score": 2.86
-    },
-    {
-      "word": "compensation package",
-      "score": 2.8546
-    },
-    {
-      "word": "gas",
-      "score": 2.825
+      "score": 2.9626
     },
     {
       "word": "per",
-      "score": 2.8176
+      "score": 2.9358
     },
     {
-      "word": "contract",
-      "score": 2.7567
+      "word": "administrative assistant",
+      "score": 2.9316
     },
     {
-      "word": "efficient",
-      "score": 2.7481
+      "word": "receptionist",
+      "score": 2.9282
     },
     {
       "word": "internet",
-      "score": 2.7411
+      "score": 2.8294
     },
     {
-      "word": "cash",
-      "score": 2.7321
+      "word": "administrative",
+      "score": 2.8283
     },
     {
       "word": "perks",
-      "score": 2.6601
+      "score": 2.8107
+    },
+    {
+      "word": "compensation package",
+      "score": 2.8098
+    },
+    {
+      "word": "efficient",
+      "score": 2.7563
+    },
+    {
+      "word": "contract",
+      "score": 2.7488
     },
     {
       "word": "referral",
-      "score": 2.5935
+      "score": 2.7226
+    },
+    {
+      "word": "gas",
+      "score": 2.7195
     },
     {
       "word": "hired",
-      "score": 2.5752
+      "score": 2.6683
     },
     {
-      "word": "entry",
-      "score": 2.5487
+      "word": "cash",
+      "score": 2.6605
+    },
+    {
+      "word": "offshore",
+      "score": 2.5986
     },
     {
       "word": "engineering",
-      "score": 2.5455
+      "score": 2.5908
+    },
+    {
+      "word": "gas industry",
+      "score": 2.5905
     }
   ],
   "structural_signals": []

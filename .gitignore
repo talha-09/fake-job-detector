@@ -3,14 +3,19 @@ backend/venv/
 __pycache__/
 *.pyc
 .env
+.env.local
 
 # Node
 frontend/node_modules/
 frontend/dist/
+frontend/.env.local
 
-# Database
+# Database (recreated at startup)
 *.db
 *.sqlite3
+
+# Training data (large CSV — not committed to git)
+backend/training/data/
 
 # Google Colab / CLI artifacts
 .config/
@@ -21,7 +26,6 @@ sample_data/
 .idea/
 .DS_Store
 Thumbs.db
-
 
 # Local steps
 Project Steps.md

@@ -69,8 +69,8 @@ print("\nCleaning text...")
 def clean_text(text: str) -> str:
     """Lowercase, strip HTML, remove non-letters, remove stopwords."""
     text = str(text).lower()
-    text = re.sub(r"<[^>]+>", " ", text)          # remove HTML tags
-    text = re.sub(r"[^a-z\s]", " ", text)          # keep letters only
+    text = re.sub(r"<[^>]+>", " ", text)            # remove HTML tags
+    text = re.sub(r"[^a-z\s]", " ", text)           # keep letters only
     text = re.sub(r"\s+", " ", text).strip()        # collapse whitespace
     tokens = [w for w in text.split() if w not in STOP_WORDS and len(w) > 2]
     return " ".join(tokens)

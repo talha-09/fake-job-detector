@@ -50,9 +50,11 @@ def _load_artefacts():
 
     missing = [p for p in [xgb_path, lr_path, tfidf_path] if not os.path.exists(p)]
     if missing:
+        # Log full paths server-side only — don't expose filesystem layout externally
+        missing_names = [os.path.basename(p) for p in missing]
         raise RuntimeError(
-            f"[predict] Missing model files: {missing}\n"
-            "Please copy the .pkl files from Colab into backend/models/ first."
+            f"[predict] Missing model files: {missing_names}. "
+            "Ensure all .pkl files are present in backend/models/."
         )
 
     _MODELS["xgboost"]              = joblib.load(xgb_path)
@@ -79,19 +81,29 @@ _load_artefacts()
 try:
     from nltk.corpus import stopwords as _sw
     import nltk as _nltk
-    _nltk.download("stopwords", quiet=True)
+    try:
+        _nltk.data.find('corpora/stopwords')
+    except LookupError:
+        _nltk.download("stopwords", quiet=True)
     _STOP_WORDS = set(_sw.words("english"))
-except Exception:
-    _STOP_WORDS = set()
+except Exception as e:
+    raise RuntimeError(f"Failed to load NLTK stopwords: {e}")
 
 
 def _clean_text(text: str) -> str:
     text = str(text).lower()
-    text = re.sub(r"<[^>]+>", " ", text)        # strip HTML
+    text = re.sub(r"\<[^\>]+\>", " ", text)        # strip HTML
     text = re.sub(r"[^a-z\s]", " ", text)        # letters only
     text = re.sub(r"\s+", " ", text).strip()
     tokens = [w for w in text.split() if w not in _STOP_WORDS and len(w) > 2]
-    return " ".join(tokens)
+    cleaned = " ".join(tokens)
+    # If stop‑word removal leaves us with < 20 characters, fall back to the full token set
+    if len(cleaned) < 20:
+        tokens = [w for w in text.split() if len(w) > 2]
+        cleaned = " ".join(tokens)
+    # Debug log (will appear in server stdout)
+    print(f"[clean_text] original len={len(text)}, cleaned len={len(cleaned)}")
+    return cleaned
 
 
 def _build_structural_features(raw_text: str, cleaned_text: str) -> np.ndarray:
@@ -158,7 +170,7 @@ def _build_explanation(
 
 # Endpoint
 @router.post("/predict", response_model=PredictResponse)
-async def predict(body: PredictRequest):
+def predict(body: PredictRequest):
     """
     Classify a job posting as Real or Fake.
 
@@ -175,20 +187,28 @@ async def predict(body: PredictRequest):
 
     # 1. Clean text
     cleaned = _clean_text(body.job_text)
-    if not cleaned.strip():
-        raise HTTPException(status_code=422, detail="Job text is too short or contains no meaningful words.")
+    if len(cleaned) < 20:
+        raise HTTPException(status_code=422, detail="Job text is too short or contains no meaningful words after cleaning.")
 
-    # 2. Vectorise text with TF-IDF
-    X_tfidf = _TFIDF.transform([cleaned])
+    try:
+        # 2. Vectorise text with TF-IDF
+        X_tfidf = _TFIDF.transform([cleaned])
 
-    # 3. Build structural features and combine with TF-IDF
-    struct = _build_structural_features(body.job_text, cleaned)
-    X_struct_sparse = sp.csr_matrix(struct)
-    X = sp.hstack([X_tfidf, X_struct_sparse])
+        # 3. Build structural features and combine with TF-IDF
+        struct = _build_structural_features(body.job_text, cleaned)
+        X_struct_sparse = sp.csr_matrix(struct)
+        X = sp.hstack([X_tfidf, X_struct_sparse])
 
-    # 4. Predict using probability + threshold
-    proba = model.predict_proba(X)[0]          # [P(Real), P(Fake)]
-    fake_prob = float(proba[1])
+        # 4. Predict using probability + threshold
+        proba = model.predict_proba(X)[0]          # [P(Real), P(Fake)]
+        fake_prob = float(proba[1])
+    except Exception as e:
+        # Log full error server-side; return a generic message to the client
+        print(f"[predict] Inference error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Model inference failed. Please try again or contact support."
+        )
 
     # Use tuned threshold from config if available
     if body.model_name == "xgboost":
