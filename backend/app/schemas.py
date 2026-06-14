@@ -4,12 +4,14 @@ FastAPI uses these automatically to validate incoming JSON and
 serialise outgoing JSON.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 
 
 # Request schemas
 class PredictRequest(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     job_text: str = Field(
         ...,
         min_length=20,
@@ -26,6 +28,8 @@ class PredictRequest(BaseModel):
 
 # Response schemas
 class PredictResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     prediction:          str         # "Fake" | "Real"
     confidence:          float       #  0.0   – 1.0
     model_used:          str
@@ -60,6 +64,8 @@ class MetricsResponse(BaseModel):
 
 
 class PredictionRecord(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     id:                  int
     job_text:            str
     prediction:          str
