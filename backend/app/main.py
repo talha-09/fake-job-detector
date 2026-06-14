@@ -60,9 +60,10 @@ app = FastAPI(
     ),
     version     = "1.0.0",
     lifespan    = lifespan,
-    docs_url    = None if _IS_PROD else "/docs",
-    redoc_url   = None if _IS_PROD else "/redoc",
-    openapi_url = None if _IS_PROD else "/openapi.json",
+    # Docs are now always enabled since this is a portfolio project
+    docs_url    = "/docs",
+    redoc_url   = "/redoc",
+    openapi_url = "/openapi.json",
 )
 
 
@@ -90,9 +91,12 @@ app.include_router(metrics_router, prefix="/api", tags=["Metrics"])
 @app.get("/", tags=["Health"])
 async def root():
     return {
-        "status":  "running",
-        "message": "Fake Job Posting Detection API",
-        "docs":    "/docs",
+        "status":  "online",
+        "app": "Fake Job Posting Detection API",
+        "description": "An explainable AI model for detecting fraudulent job descriptions.",
+        "frontend_url": "https://fake-job-detector-azure.vercel.app",
+        "api_docs": "/docs",
+        "developer": "Talha"
     }
 
 
